@@ -1,0 +1,26 @@
+.card-hover {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  background-color: #343a40 !important; /* Slightly lighter dark */
+  color: #ffffff;
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.card-hover:hover .card-title,
+.card-hover:hover svg {
+  color: #f8f9fa;
+}
+.nav-link.text-white:hover {
+  background-color: #d4d4d4;
+  color: #a8a8a8 !important; /* Bootstrap's yellow accent */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.nav-link.text-white.active {
+  background-color: #343a40;
+  color: #a8a8a8 !important; /* Bootstrap's yellow accent */
+  font-weight: bold;
+}
