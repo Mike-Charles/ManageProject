@@ -21,7 +21,8 @@ function Login() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3001/api/users/login', {
+      // ✅ Updated to your Render backend:
+      const res = await fetch('https://courtcase-backend.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -35,11 +36,10 @@ function Login() {
         // Show error under Login heading
         setError(data.error || 'Wrong username or password');
         return;
-      }else{
+      } else {
+        // Save user to localStorage
+        localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect based on role
-        localStorage.setItem('user', JSON.stringify(data.user)); // 👈 Save to localStorage
-        
         // Redirect based on role
         if (data.user.role === 'Admin') {
           window.location.href = '/AdminDashboard';
@@ -48,9 +48,7 @@ function Login() {
         } else if (data.user.role === 'Clerk') {
           window.location.href = '/ClerkDashboard';
         }
-
       }
-
     } catch (err) {
       setError('An error occurred. Please try again.');
     }

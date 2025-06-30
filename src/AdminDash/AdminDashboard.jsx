@@ -7,7 +7,7 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 import axios from "axios";
-import "./AdminDashboard.css"; // Make sure this CSS file is created and imported
+import "./AdminDashboard.css"; // Make sure this CSS file exists and is styled
 
 function AdminDashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -34,7 +34,10 @@ function AdminDashboard() {
 
   const fetchClosedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/api/cases?status=Closed");
+      // ✅ Updated to use your live backend on Render:
+      const res = await axios.get(
+        "https://courtcase-backend.onrender.com/api/cases?status=Closed"
+      );
       setClosedCases(res.data);
     } catch (err) {
       console.error("Error fetching closed cases:", err);
