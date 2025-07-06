@@ -5,7 +5,7 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import Login from './Login'
 import AdminDashboard from './AdminDash/AdminDashboard'
 import Judge from './Judge'
-import ClerkDashboard from './ClerkDashboard'
+import ClerkDashboard from './ClerkDash/ClerkDashboard'
 import ManageUsers from './AdminDash/ManageUsers'
 import ManageCases from './AdminDash/ManageCases'
 import ManageSchedules from './AdminDash/ManageSchedules'
@@ -21,7 +21,7 @@ function App() {
           <Route path='/register' element={<Signup />}></Route>
           <Route path='/login' element={<Login />}></Route>
           <Route path='/judge' element={<Judge />}></Route>
-          <Route path='/clerkdashboard' element={<ClerkDashboard />}></Route>
+          <Route path='/ClerkDashboard' element={<ClerkDashboard />}></Route>
           <Route path='/AdminDashboard' element={<AdminDashboard />}></Route>
           <Route path='/ManageCases' element={<ManageCases />}></Route>
           <Route path='/ManageSchedules' element={<ManageSchedules />}></Route>
