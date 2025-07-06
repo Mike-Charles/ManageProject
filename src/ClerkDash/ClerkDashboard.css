@@ -1,0 +1,16 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: url('/images/court-background.jpg') center/cover no-repeat fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay {
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7); /* dark overlay for better text readability */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

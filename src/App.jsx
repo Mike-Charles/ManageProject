@@ -9,6 +9,7 @@ import ClerkDashboard from './ClerkDash/ClerkDashboard'
 import ManageUsers from './AdminDash/ManageUsers'
 import ManageCases from './AdminDash/ManageCases'
 import ManageSchedules from './AdminDash/ManageSchedules'
+import FileCase from './ClerkDash/FileCase'
 
 function App() {
   
@@ -21,10 +22,14 @@ function App() {
           <Route path='/register' element={<Signup />}></Route>
           <Route path='/login' element={<Login />}></Route>
           <Route path='/judge' element={<Judge />}></Route>
-          <Route path='/ClerkDashboard' element={<ClerkDashboard />}></Route>
+          
           <Route path='/AdminDashboard' element={<AdminDashboard />}></Route>
           <Route path='/ManageCases' element={<ManageCases />}></Route>
           <Route path='/ManageSchedules' element={<ManageSchedules />}></Route>
+
+          {/* Clerk Dashboard */}
+          <Route path='/ClerkDashboard' element={<ClerkDashboard />}></Route>
+          <Route path='/FileCase' element={<FileCase />}></Route>
 
           {/* Admin Dashboard */}
           <Route path='/ManageUsers' element={<ManageUsers />}></Route>          
