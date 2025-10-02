@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./Login.css"; // Your existing CSS
+import "./Login.css"; // Your CSS
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,25 +12,26 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
-      // ✅ Backend URL already pointing to Render
       const res = await axios.post(
-        "https://manageproject-8prc.onrender.com/api/auth/login",
+        "https://courtcase-backend.onrender.com/api/auth/login",
         { email, password }
       );
 
       const { token, user } = res.data;
 
-      // Save token and user
+      // Save token and user info in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      // Redirect based on role
+      // Navigate based on role
       if (user.role === "registrar") navigate("/registrardashboard");
       else if (user.role === "admin") navigate("/admindashboard");
       else if (user.role === "clerk") navigate("/clerkdashboard");
       else if (user.role === "judge") navigate("/judgedashboard");
       else navigate("/");
+
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }
@@ -60,6 +61,7 @@ export default function Login() {
               required
             />
           </div>
+
           <div className="form-group mb-4">
             <label>Password</label>
             <input
