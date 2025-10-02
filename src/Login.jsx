@@ -1,108 +1,94 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "./Login.css"; // Updated CSS
 
-function Login() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
+    setError("");
     try {
-      // ✅ Updated to your Render backend:
-      const res = await fetch('https://courtcase-backend.onrender.com/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
       });
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Show error under Login heading
-        setError(data.error || 'Wrong username or password');
-        return;
-      } else {
-        // Save user to localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        // Redirect based on role
-        if (data.user.role === 'Admin') {
-          window.location.href = '/AdminDashboard';
-        } else if (data.user.role === 'Judge') {
-          window.location.href = '/JudgeDashboard';
-        } else if (data.user.role === 'Clerk') {
-          window.location.href = '/ClerkDashboard';
-        }
-      }
+      if (user.role === "registrar") navigate("/registrardashboard");
+      else if (user.role === "admin") navigate("/admindashboard");
+      else if (user.role === "clerk") navigate("/clerkdashboard");
+      else if (user.role === "judge") navigate("/judgedashboard");
+      else navigate("/");
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <div className="card p-4 shadow-sm" style={{ width: '100%', maxWidth: '400px' }}>
-        <h2 className="mb-2 text-center">Login</h2>
+    <div className="login-wrapper">
+      <div className="login-left">
+        <div className="login-welcome">
+          <h1>Welcome to Court System</h1>
+          <p>Nice to see you again</p>
+        </div>
+      </div>
+      <div className="login-right">
+        <form onSubmit={handleSubmit} className="login-form shadow">
+          <h2 className="text-center mb-4">Login</h2>
+          <p className="text-center text-muted">Please enter your details</p>
+          {error && <div className="alert alert-danger mt-3">{error}</div>}
 
-        {/* 🔴 Error Message Below "Login" */}
-        {error && (
-          <div className="text-danger text-center mb-3" style={{ fontSize: '14px' }}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email address</label>
+          <div className="form-group mb-3">
+            <label>Email</label>
             <input
               type="email"
               className="form-control"
-              id="email"
-              placeholder="Enter email"
-              value={formData.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Password</label>
+          <div className="form-group mb-4">
+            <label>Password</label>
             <input
               type="password"
               className="form-control"
-              id="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100">Login</button>
-        </form>
 
-        <div className="text-center mt-3">
-          <label className="form-label">Or</label>
-        </div>
-        <div className="d-flex justify-content-between align-items-center mt-2">
-          <a href="">Forgot Password?</a>
-        </div>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="form-check">
+              <input type="checkbox" className="form-check-input" id="remember" />
+              <label className="form-check-label" htmlFor="remember">
+                Stay signed in
+              </label>
+            </div>
+            <a href="/forgot-password" className="text-primary">
+              Forgot password?
+            </a>
+          </div>
+
+          <button type="submit" className="btn btn-success w-100">
+            Login
+          </button>
+
+          {/* <div className="text-center mt-3">
+            <a href="/register" className="btn btn-outline-success w-100">
+              Sign Up
+            </a>
+          </div> */}
+        </form>
       </div>
     </div>
   );
 }
-
-export default Login;

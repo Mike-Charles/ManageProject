@@ -1,0 +1,364 @@
+// PlaceJudgment.jsx
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import {
+  FaHome,
+  FaUserCircle,
+  FaSignOutAlt,
+  FaClipboardList,
+  FaChevronDown,
+  FaLock,
+  FaBell,
+  FaGavel,
+  FaArrowLeft,
+  FaChartPie,
+  FaCalendarAlt,
+} from "react-icons/fa";
+import "./JudgeDashboard.css";
+
+export default function PlaceJudgment() {
+  const navigate = useNavigate();
+  const { caseId } = useParams();
+
+  const [user, setUser] = useState(null);
+  const [caseData, setCaseData] = useState(null);
+  const [judgmentText, setJudgmentText] = useState("");
+  const [verdict, setVerdict] = useState("");
+  const [documentFile, setDocumentFile] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const userDropdownRef = useRef();
+  const notificationsRef = useRef();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return navigate("/login");
+
+    const parsedUser = JSON.parse(storedUser);
+    if (parsedUser.role !== "judge") return navigate("/unauthorized");
+    setUser(parsedUser);
+
+    fetchNotifications(parsedUser._id);
+    if (caseId) {
+      fetchCase(caseId);
+    } else {
+      setLoading(false);
+      setError("No case selected");
+    }
+  }, [navigate, caseId]);
+
+  const fetchCase = async (id) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/cases/${id}`);
+      if (!res.data) {
+        setError("Case not found");
+      } else {
+        setCaseData(res.data);
+      }
+    } catch (err) {
+      console.error("Error fetching case:", err);
+      setError("Failed to fetch case");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async (userId) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      setNotifications(res.data);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!verdict || !judgmentText) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:5000/api/judgments`, {
+        caseId,
+        judgmentText,
+        verdict,
+        judgeId: user._id,
+      });
+
+      if (documentFile) {
+        const formData = new FormData();
+        formData.append("document", documentFile);
+        await axios.post(
+          `http://localhost:5000/api/documents/upload/${caseId}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+      }
+
+      await axios.put(`http://localhost:5000/api/cases/${caseId}/updateStatus`, {
+        status: "Judged",
+      });
+
+      alert("Judgment submitted successfully");
+      navigate("/judgments");
+    } catch (err) {
+      console.error("Error submitting judgment:", err);
+      alert("Failed to submit judgment. Check console for details.");
+    }
+  };
+
+  // Mark notification as read
+  const markAsRead = async (notificationId) => {
+    try {
+      await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === notificationId ? { ...n, status: "Read" } : n
+        )
+      );
+    } catch (err) {
+      console.error("Error marking notification as read:", err);
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="admin-dashboard" style={{ padding: 0, margin: 0, minHeight: "100vh" }}>
+      {/* HEADER - same as JudgeDashboard */}
+      <header
+        style={{
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          zIndex: 1000,
+          padding: "12px 0",
+        }}
+      >
+        <nav className="navbar navbar-expand-lg navbar-light bg-light px-3">
+          <a className="navbar-brand fw-bold" href="#" style={{ color: "#007bff" }}>
+            CourtSys
+          </a>
+
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#mobileMenu"
+            aria-controls="mobileMenu"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          <div className="collapse navbar-collapse d-none d-lg-flex justify-content-end" style={{ display: "flex", justifyContent: "space-evenly" }}>
+            <div className="collapse navbar-collapse d-none d-lg-flex justify-content-end" style={{ marginLeft: 250 }}>
+              <form className="d-flex mx-3" style={{ flex: 8, maxWidth: 400 }}>
+                <input
+                  className="form-control"
+                  type="search"
+                  placeholder="Search cases..."
+                  aria-label="Search"
+                  style={{ borderRadius: 30 }}
+                  value=""
+                  onChange={() => {}}
+                />
+              </form>
+            </div>
+            <div className="navbar-collapse d-none d-lg-flex justify-content-end">
+              {/* Notifications */}
+              <div className="nav-item me-3 position-relative" ref={notificationsRef}>
+                <FaBell
+                  size={22}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                />
+                {notifications.filter((n) => n.status === "Unread").length > 0 && (
+                  <span className="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+                    {notifications.filter((n) => n.status === "Unread").length}
+                  </span>
+                )}
+
+                {/* Notification Dropdown */}
+                {showNotifications && (
+                  <div
+                    className="dropdown-menu show shadow p-2"
+                    style={{
+                      right: 0,
+                      position: "absolute",
+                      width: "350px",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {notifications.length === 0 ? (
+                      <p className="text-center my-2">No notifications</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n._id}
+                          className={`notification-item p-2 mb-1 ${n.status === "Unread" ? "bg-light" : ""}`}
+                          style={{ cursor: "pointer", borderRadius: "5px" }}
+                          onClick={() => markAsRead(n._id)}
+                        >
+                          <strong>{n.title || "New Case Assigned"}</strong>
+                          <p style={{ margin: 0, fontSize: "0.85rem" }}>{n.message}</p>
+                          <small className="text-muted">{new Date(n.sentAt).toLocaleString()}</small>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="position-relative" ref={userDropdownRef}>
+                <button
+                  className="btn btn-light d-flex align-items-center"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                >
+                  <FaUserCircle size={28} className="me-2" />
+                  <span>{user?.name}</span>
+                </button>
+
+                {userDropdownOpen && (
+                  <div className="dropdown-menu show shadow p-2" style={{ right: 0, position: "absolute" }}>
+                    <span style={{ color: "#6c757d", fontSize: "0.7em" }}>{user?.email}</span>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => navigate("/change-password")}>
+                      <FaLock className="me-1" /> Change Password
+                    </button>
+                    <button className="dropdown-item d-flex align-items-center" onClick={handleLogout}>
+                      <FaSignOutAlt className="me-1" /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="offcanvas offcanvas-start" tabIndex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+          <div className="offcanvas-header">
+            <h5 className="offcanvas-title" id="mobileMenuLabel">Menu</h5>
+            <button type="button" className="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div className="offcanvas-body">
+            <ul className="list-group">
+              <li className="list-group-item" onClick={() => navigate("/judgedashboard")}><FaHome /> Home</li>
+              <li className="list-group-item" onClick={() => navigate("/casesassigned")}><FaClipboardList /> Cases Assigned</li>
+              <li className="list-group-item" onClick={() => navigate("/schedulehearing")}><FaCalendarAlt /> Hearing Schedule</li>
+              <li className="list-group-item" onClick={() => navigate("/judgmenthistory")}><FaGavel /> Judgment History</li>
+              <li className="list-group-item" onClick={() => navigate("/progress")}><FaChartPie /> Case Progress</li>
+              <li className="list-group-item" onClick={() => navigate("/notifications")}>
+                <div className=" position-relative" ref={notificationsRef}>
+                  <FaBell
+                    size={22}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setShowNotifications(!showNotifications)}
+                  />
+                  <div style={{ marginLeft: '-28px', marginTop: '-90px', display: 'inline' }}>
+                    {notifications.filter((n) => n.status === "Unread").length > 0 && (
+                      <span className="badge bg-danger rounded-pill start-100 translate-middle"
+                        style={{ fontSize: '0.6rem'}}
+                      >
+                        {notifications.filter((n) => n.status === "Unread").length}
+                      </span>
+                    )}
+                  </div>
+                </div>                
+                Notifications</li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      {/* Rest of content remains unchanged */}
+      <div className="admin-content" style={{ padding: 0}}>
+        {/* Sidebar */}
+        <aside className="admin-sidebar" style={{ width: "250px" }}>
+          <ul className="admin-nav">
+            <li onClick={() => navigate("/judgedashboard")}><FaHome /> Home</li>
+            <li onClick={() => navigate("/casesassigned")}><FaClipboardList /> Assigned Cases</li>
+            <li onClick={() => navigate("/schedulehearing")}><FaCalendarAlt /> Hearing Schedule</li>
+            <li onClick={() => navigate("/progress")}><FaChartPie /> Cases Progress</li>
+            <li onClick={() => navigate("/judgmenthistory")}><FaGavel /> Judgment History</li>
+            <li onClick={() => navigate("/notification")}>
+            <div className=" position-relative" ref={notificationsRef}>
+              <FaBell
+                size={22}
+                style={{ cursor: "pointer" }}
+                onClick={() => setShowNotifications(!showNotifications)}
+              />
+              <div style={{ marginLeft: '-28px', marginTop: '-90px', display: 'inline' }}>
+                {notifications.filter((n) => n.status === "Unread").length > 0 && (
+                  <span className="badge bg-danger rounded-pill start-100 translate-middle"
+                    style={{ fontSize: '0.6rem'}}
+                  >
+                    {notifications.filter((n) => n.status === "Unread").length}
+                  </span>
+                )}
+              </div>
+            </div>
+              Notifications</li>
+          </ul>
+        </aside>
+
+        <main className="admin-main" style={{ paddingBottom: "130px" }}>
+          <section className="admin-card">
+            <button className="btn btn-secondary" onClick={() => navigate(-1)} style={{ marginBottom: "1rem" }}>
+              <FaArrowLeft style={{ marginRight: "6px" }} /> Back
+            </button>
+
+            {loading ? (
+              <p>Loading case...</p>
+            ) : error ? (
+              <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>
+            ) : (
+              <>
+                <h3>Place Judgment for: {caseData.title}</h3>
+                <p><strong>Filed By:</strong> {caseData.filedByName}</p>
+
+                <form onSubmit={handleSubmit} className="judgment-form">
+                  <div className="form-group">
+                    <label>Verdict</label>
+                    <input type="text" value={verdict} onChange={(e) => setVerdict(e.target.value)} required className="form-control" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Judgment Text</label>
+                    <textarea value={judgmentText} onChange={(e) => setJudgmentText(e.target.value)} rows={6} required className="form-control" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Upload Supporting Document (optional)</label>
+                    <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setDocumentFile(e.target.files[0])} className="form-control" />
+                  </div>
+
+                  <button type="submit" className="btn btn-primary">Submit Judgment</button>
+                </form>
+              </>
+            )}
+          </section>
+        </main>
+      </div>
+    </div>
+  );
+}

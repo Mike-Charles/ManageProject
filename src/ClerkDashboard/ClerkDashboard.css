@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+.admin-user-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.admin-user-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.admin-user-name {
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.admin-user-email {
+  color: #89898a;
+  font-size: 0.75rem;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 0.5rem 0;
+  z-index: 2000;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: background 0.2s;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f1f5f9;
+}
+ 
+
+.admin-grid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  flex: 1 1 250px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.stat-info p {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Colors for icons */
+.stat-card.assigned .stat-icon {
+  background-color: #d1fae5; /* light green bg */
+  color: #10b981; /* green icon */
+}
+
+.stat-card.in-progress .stat-icon {
+  background-color: #fef3c7; /* light amber bg */
+  color: #f59e0b; /* amber icon */
+}
+
+.stat-card.scheduled .stat-icon {
+  background-color: #dbeafe; /* light blue bg */
+  color: #2563eb; /* blue icon */
+}
+
+.admin-sidebar{
+  width: 220px;
+}
+
+
+
+
