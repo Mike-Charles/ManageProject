@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./Login.css"; // Updated CSS
+import "./Login.css"; // Your existing CSS
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,14 +13,19 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      // ✅ Backend URL already pointing to Render
+      const res = await axios.post(
+        "https://manageproject-8prc.onrender.com/api/auth/login",
+        { email, password }
+      );
+
       const { token, user } = res.data;
+
+      // Save token and user
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
+      // Redirect based on role
       if (user.role === "registrar") navigate("/registrardashboard");
       else if (user.role === "admin") navigate("/admindashboard");
       else if (user.role === "clerk") navigate("/clerkdashboard");
@@ -81,12 +86,6 @@ export default function Login() {
           <button type="submit" className="btn btn-success w-100">
             Login
           </button>
-
-          {/* <div className="text-center mt-3">
-            <a href="/register" className="btn btn-outline-success w-100">
-              Sign Up
-            </a>
-          </div> */}
         </form>
       </div>
     </div>
