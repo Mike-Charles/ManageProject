@@ -1,4 +1,3 @@
-// ClerkCaseRegistration.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -57,19 +56,20 @@ const ClerkCaseRegistration = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [navigate]);
+const fetchCases = async (clerkId) => {
+  setLoading(true);
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/cases/registered/byClerk/${clerkId}`
+    );
+    setCases(res.data || []); // ensure it’s an array
+  } catch (err) {
+    console.error("Error fetching cases:", err);
+    setCases([]); // fallback
+  }
+  setLoading(false);
+};
 
-  const fetchCases = async (clerkId) => {
-    setLoading(true);
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/cases/registered/byClerk/${clerkId}`
-      );
-      setCases(res.data);
-    } catch (err) {
-      console.error("Error fetching cases:", err);
-    }
-    setLoading(false);
-  };
 
   const fetchNotifications = async (userId) => {
     try {
@@ -113,17 +113,16 @@ const ClerkCaseRegistration = () => {
 
   const filteredCases = cases.filter(
     (c) =>
-      c.caseNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.plaintiff.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.defendant.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="admin-dashboard">
-      {/* Header (copied exactly from ClerkDashboard.jsx) */}
+      {/* Header */}
       <header className="admin-header navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
         <div className="navbar-brand fw-bold">CourtSys</div>
-
-        {/* Mobile Menu Button */}
         <button
           className="btn btn-light d-lg-none ms-auto"
           type="button"
@@ -133,10 +132,7 @@ const ClerkCaseRegistration = () => {
         >
           ☰
         </button>
-
-        {/* Desktop Section */}
         <div className="collapse navbar-collapse d-none d-lg-flex justify-content-end">
-          {/* Search */}
           <form className="d-flex me-3">
             <input
               type="text"
@@ -147,8 +143,6 @@ const ClerkCaseRegistration = () => {
               style={{ maxWidth: "400px" }}
             />
           </form>
-
-          {/* Notifications */}
           <div className="position-relative me-3">
             <FaBell size={24} />
             {notifications.length > 0 && (
@@ -157,8 +151,6 @@ const ClerkCaseRegistration = () => {
               </span>
             )}
           </div>
-
-          {/* User Dropdown */}
           <div className="position-relative" ref={userDropdownRef}>
             <button
               className="btn btn-light d-flex align-items-center"
@@ -168,7 +160,6 @@ const ClerkCaseRegistration = () => {
               <span>{user?.name}</span>
               <FaChevronDown className="ms-1" />
             </button>
-
             {userDropdownOpen && (
               <div
                 className="dropdown-menu show shadow p-2"
@@ -196,7 +187,7 @@ const ClerkCaseRegistration = () => {
         </div>
       </header>
 
-      {/* Mobile Offcanvas Menu */}
+      {/* Mobile Menu */}
       <div
         className="offcanvas offcanvas-start"
         tabIndex="-1"
@@ -233,7 +224,6 @@ const ClerkCaseRegistration = () => {
       </div>
 
       <div className="admin-content">
-        {/* Sidebar */}
         <aside className="admin-sidebar d-none d-lg-block" style={{ width: "300px" }}>
           <ul className="admin-nav">
             <li className="list-group-item" onClick={() => navigate("/clerkdashboard")}>
@@ -251,7 +241,6 @@ const ClerkCaseRegistration = () => {
           </ul>
         </aside>
 
-        {/* Main Content */}
         <main className="admin-main">
           <section className="admin-card card-table">
             <div className="d-flex justify-content-between align-items-center">
@@ -264,7 +253,6 @@ const ClerkCaseRegistration = () => {
               </button>
             </div>
 
-            {/* Table */}
             <div className="table-responsive table-card mt-3">
               <table className="table table-striped">
                 <thead>
@@ -272,6 +260,8 @@ const ClerkCaseRegistration = () => {
                     <th>Case Number</th>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
                     <th>Status</th>
                     <th>Filed By</th>
                     <th>Actions</th>
@@ -280,23 +270,20 @@ const ClerkCaseRegistration = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="6" className="text-center">
-                        Loading...
-                      </td>
+                      <td colSpan="8" className="text-center">Loading...</td>
                     </tr>
                   ) : filteredCases.length > 0 ? (
                     filteredCases.map((c) => (
                       <tr key={c._id}>
-                        <td>{c.caseNumber}</td>
+                        <td>{c.caseNumber || "N/A"}</td>
                         <td>{c.title}</td>
                         <td>{c.description || "N/A"}</td>
+                        <td>{c.plaintiff?.name || "N/A"}</td>
+                        <td>{c.defendant?.name || "N/A"}</td>
                         <td>{c.status}</td>
                         <td>{c.filedByName}</td>
                         <td>
-                          <div
-                            className="d-flex align-items-center gap-2"
-                            ref={actionDropdownRef}
-                          >
+                          <div className="d-flex align-items-center gap-2" ref={actionDropdownRef}>
                             <button
                               className="btn btn-success btn-sm d-flex align-items-center gap-1"
                               onClick={() => handleSubmitCase(c._id)}
@@ -308,9 +295,7 @@ const ClerkCaseRegistration = () => {
                             <div
                               className="action-dropdown-container"
                               onClick={() =>
-                                setActionDropdownOpen(
-                                  actionDropdownOpen === c._id ? null : c._id
-                                )
+                                setActionDropdownOpen(actionDropdownOpen === c._id ? null : c._id)
                               }
                             >
                               <span className="three-dots">...</span>
@@ -318,9 +303,7 @@ const ClerkCaseRegistration = () => {
                                 <div className="action-dropdown-menu">
                                   <div
                                     className="action-dropdown-item"
-                                    onClick={() =>
-                                      navigate(`/cases/edit/${c._id}`)
-                                    }
+                                    onClick={() => navigate(`/cases/edit/${c._id}`)}
                                   >
                                     Edit
                                   </div>
@@ -339,9 +322,7 @@ const ClerkCaseRegistration = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="text-center">
-                        No registered cases found
-                      </td>
+                      <td colSpan="8" className="text-center">No registered cases found</td>
                     </tr>
                   )}
                 </tbody>

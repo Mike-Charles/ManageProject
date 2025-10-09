@@ -14,6 +14,7 @@ import {
   FaGavel,
   FaEdit,
   FaChartPie,
+  FaEye,
 } from "react-icons/fa";
 import {
   BarChart,
@@ -42,6 +43,7 @@ export default function JudgeDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false); // NEW
+  const [viewCase, setViewCase] = useState(null); // Case to view in modal
   const casesPerPage = 6;
 
   const userDropdownRef = useRef();
@@ -387,10 +389,13 @@ export default function JudgeDashboard() {
                       <td>{c.status || "Assigned"}</td>
                       <td>
                         <button
-                          className="btn btn-edit"
-                          onClick={() => navigate(`/casesassigned`)}
+                          className="btn btn-sm btn-primary me-2"
+                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
+                          onClick={() => setViewCase(c)}
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewCaseModal"
                         >
-                          <FaEdit /> View
+                          <FaEye /> View
                         </button>
                       </td>
                     </tr>
@@ -412,6 +417,53 @@ export default function JudgeDashboard() {
               ))}
             </div>
           </section>
+            {/* View Case Modal */}
+          <div className="modal fade" id="viewCaseModal" tabIndex="-1" aria-labelledby="viewCaseModalLabel" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header text-white" style={{ backgroundColor: "lightblue" }}>
+                  <h5 className="modal-title" id="viewCaseModalLabel">Case Details</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                  {viewCase ? (
+                    <div className="container">
+                      <div className="row mb-3">
+                        <div className="col-md-6"><strong>Case Title:</strong> {viewCase.title}</div>
+                        <div className="col-md-6"><strong>Filing Date:</strong> {new Date(viewCase.filingDate).toLocaleDateString()}</div>
+                      </div>
+                      <div className="row mb-3">
+                        <div className="col-md-12"><strong>Description:</strong> {viewCase.description}</div>
+                      </div>
+                      <div className="row mb-3">
+                        <div className="col-md-6"><strong>Filed By:</strong> {viewCase.filedByName}</div>
+                        <div className="col-md-6"><strong>Status:</strong> {viewCase.status}</div>
+                      </div>
+                      <hr />
+                      <div className="row mb-3">
+                        <div className="col-md-6">
+                          <h6>Plaintiff</h6>
+                          <p><strong>Name:</strong> {viewCase.plaintiff?.name}</p>
+                          <p><strong>Address:</strong> {viewCase.plaintiff?.address}</p>
+                          <p><strong>Phone:</strong> {viewCase.plaintiff?.phone}</p>
+                          <p><strong>Email:</strong> {viewCase.plaintiff?.email}</p>
+                        </div>
+                        <div className="col-md-6">
+                          <h6>Defendant</h6>
+                          <p><strong>Name:</strong> {viewCase.defendant?.name}</p>
+                          <p><strong>Address:</strong> {viewCase.defendant?.address}</p>
+                          <p><strong>Phone:</strong> {viewCase.defendant?.phone}</p>
+                          <p><strong>Email:</strong> {viewCase.defendant?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p>No case selected</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>  
 
           {/* Upcoming Hearings Table */}
           <section className="admin-card card-table" style={{ marginTop: "20px" }}>

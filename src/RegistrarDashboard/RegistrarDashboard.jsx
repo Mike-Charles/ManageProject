@@ -12,6 +12,9 @@ import {
   FaBell,
   FaGavel,
   FaTimesCircle,
+  FaEye,
+  FaClipboard,
+  FaFileAlt,
 } from "react-icons/fa";
 import {
   BarChart,
@@ -41,6 +44,7 @@ export default function RegistrarDashboard() {
   const [notifications, setNotifications] = useState([]);
   const [caseStats, setCaseStats] = useState({});
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [viewCase, setViewCase] = useState(null); // Case to view in modal
 
 
 
@@ -449,32 +453,80 @@ useEffect(() => {
                       </td>
                       <td>
                         <button
-                          style={{
-                            backgroundColor: "green",
-                            color: "white",
-                            borderRadius: 30,
-                          }}
-                          onClick={() =>
-                            endorseCase(c._id, selectedJudges[c._id])
-                          }
-                          className="btn btn-edit"
+                          className="btn btn-sm btn-primary me-2"
+                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
+                          onClick={() => setViewCase(c)}
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewCaseModal"
                         >
-                          Assign Now
+                          <FaEye /> View
+                        </button>
+                        <button
+                          style={{ backgroundColor: "green", color: "white", borderRadius: 30 }}
+                          onClick={() => endorseCase(c._id, selectedJudges[c._id])}
+                          className="btn btn-sm"
+                        >
+                          Assign
                         </button>
                       </td>
                     </tr>
                   ))}
                   {approvedCases.length === 0 && (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center" }}>
-                        No cases ready for assignment
-                      </td>
+                      <td colSpan="5" style={{ textAlign: "center" }}>No cases ready for assignment</td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
           </section>
+          {/* View Case Modal */}
+          <div className="modal fade" id="viewCaseModal" tabIndex="-1" aria-labelledby="viewCaseModalLabel" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header text-white" style={{ backgroundColor: "lightblue" }}>
+                  <h5 className="modal-title" id="viewCaseModalLabel">Case Details</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                  {viewCase ? (
+                    <div className="container">
+                      <div className="row mb-3">
+                        <div className="col-md-6"><strong>Case Title:</strong> {viewCase.title}</div>
+                        <div className="col-md-6"><strong>Filing Date:</strong> {new Date(viewCase.filingDate).toLocaleDateString()}</div>
+                      </div>
+                      <div className="row mb-3">
+                        <div className="col-md-12"><strong>Description:</strong> {viewCase.description}</div>
+                      </div>
+                      <div className="row mb-3">
+                        <div className="col-md-6"><strong>Filed By:</strong> {viewCase.filedByName}</div>
+                        <div className="col-md-6"><strong>Status:</strong> {viewCase.status}</div>
+                      </div>
+                      <hr />
+                      <div className="row mb-3">
+                        <div className="col-md-6">
+                          <h6>Plaintiff</h6>
+                          <p><strong>Name:</strong> {viewCase.plaintiff?.name}</p>
+                          <p><strong>Address:</strong> {viewCase.plaintiff?.address}</p>
+                          <p><strong>Phone:</strong> {viewCase.plaintiff?.phone}</p>
+                          <p><strong>Email:</strong> {viewCase.plaintiff?.email}</p>
+                        </div>
+                        <div className="col-md-6">
+                          <h6>Defendant</h6>
+                          <p><strong>Name:</strong> {viewCase.defendant?.name}</p>
+                          <p><strong>Address:</strong> {viewCase.defendant?.address}</p>
+                          <p><strong>Phone:</strong> {viewCase.defendant?.phone}</p>
+                          <p><strong>Email:</strong> {viewCase.defendant?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p>No case selected</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>          
 
           {/* Disapproved Cases */}
           <section className="admin-card card-table">

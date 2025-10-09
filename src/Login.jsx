@@ -73,13 +73,7 @@ export default function Login() {
             />
           </div>
 
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div className="form-check">
-              <input type="checkbox" className="form-check-input" id="remember" />
-              <label className="form-check-label" htmlFor="remember">
-                Stay signed in
-              </label>
-            </div>
+          <div className="justify-content-between align-items-center mb-4">
             <a href="/forgot-password" className="text-primary">
               Forgot password?
             </a>

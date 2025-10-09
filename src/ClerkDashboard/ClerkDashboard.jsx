@@ -21,7 +21,7 @@ import "./ClerkDashboard.css";
 export default function ClerkDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [submittedCases, setSubmittedCases] = useState([]);
+  const [cases, setCases] = useState([]);
   const [caseStats, setCaseStats] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,39 +51,29 @@ export default function ClerkDashboard() {
 
     setUser(parsedUser);
 
-    fetchSubmittedCases(parsedUser._id);
-    fetchCaseStats(parsedUser._id);
+    fetchRegisteredCases(parsedUser._id);
     fetchNotifications(parsedUser._id);
   }, [navigate]);
 
-  // API Calls
-  const fetchSubmittedCases = async (clerkId) => {
+  // Fetch cases with status "Registered" for the clerk
+  const fetchRegisteredCases = async (clerkId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/cases/submitted/byClerk/${clerkId}`
+        `http://localhost:5000/api/cases/registered/byClerk/${clerkId}`
       );
-      setSubmittedCases(res.data);
-    } catch (err) {
-      console.error("Error fetching submitted cases:", err);
-    }
-  };
+      setCases(res.data);
 
-  const fetchCaseStats = async (clerkId) => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/cases/submitted/byClerk/${clerkId}`
-      );
-
-      const stats = { Submitted: 0, Approved: 0, Pending: 0 };
+      // Compute stats
+      const stats = { Registered: 0, Submitted: 0, Approved: 0, Pending: 0 };
       res.data.forEach((c) => {
-        if (c.status === "Submitted") stats.Submitted++;
+        if (c.status === "Registered") stats.Registered++;
+        else if (c.status === "Submitted") stats.Submitted++;
         else if (c.status === "Approved") stats.Approved++;
         else if (c.status === "Pending") stats.Pending++;
       });
-
       setCaseStats(stats);
     } catch (err) {
-      console.error("Error fetching case stats:", err);
+      console.error("Error fetching registered cases:", err);
     }
   };
 
@@ -98,7 +88,6 @@ export default function ClerkDashboard() {
     }
   };
 
-  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -106,7 +95,7 @@ export default function ClerkDashboard() {
   };
 
   // Pagination + Search
-  const filteredCases = submittedCases.filter(
+  const filteredCases = cases.filter(
     (c) =>
       c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -118,12 +107,10 @@ export default function ClerkDashboard() {
 
   return (
     <div className="admin-dashboard">
-      {/* Header (copied from RegistrarDashboard) */}
+      {/* Header */}
       <header className="admin-header navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
-        {/* Left: Logo */}
         <div className="navbar-brand fw-bold">CourtSys</div>
 
-        {/* Mobile Menu Button */}
         <button
           className="btn btn-light d-lg-none ms-auto"
           type="button"
@@ -134,9 +121,7 @@ export default function ClerkDashboard() {
           <FaBars />
         </button>
 
-        {/* Desktop Section */}
         <div className="collapse navbar-collapse d-none d-lg-flex justify-content-end">
-          {/* Search */}
           <form className="d-flex me-3">
             <input
               type="text"
@@ -151,7 +136,6 @@ export default function ClerkDashboard() {
             />
           </form>
 
-          {/* Notifications */}
           <div className="position-relative me-3">
             <FaBell size={24} />
             {notifications.length > 0 && (
@@ -161,7 +145,6 @@ export default function ClerkDashboard() {
             )}
           </div>
 
-          {/* User Dropdown */}
           <div className="position-relative" ref={userDropdownRef}>
             <button
               className="btn btn-light d-flex align-items-center"
@@ -173,24 +156,15 @@ export default function ClerkDashboard() {
             </button>
 
             {userDropdownOpen && (
-              <div
-                className="dropdown-menu show shadow p-2"
-                style={{ right: 0, position: "absolute" }}
-              >
+              <div className="dropdown-menu show shadow p-2" style={{ right: 0, position: "absolute" }}>
                 <div className="px-3 py-2 border-bottom">
                   <div className="fw-bold">{user?.name}</div>
                   <small className="text-muted">{user?.email}</small>
                 </div>
-                <button
-                  className="dropdown-item d-flex align-items-center"
-                  onClick={() => navigate("/change-password")}
-                >
+                <button className="dropdown-item d-flex align-items-center" onClick={() => navigate("/change-password")}>
                   <FaLock className="me-1" /> Change Password
                 </button>
-                <button
-                  className="dropdown-item d-flex align-items-center"
-                  onClick={handleLogout}
-                >
+                <button className="dropdown-item d-flex align-items-center" onClick={handleLogout}>
                   <FaSignOutAlt className="me-1" /> Logout
                 </button>
               </div>
@@ -199,96 +173,61 @@ export default function ClerkDashboard() {
         </div>
       </header>
 
-      {/* Mobile Offcanvas Menu */}
-      <div
-        className="offcanvas offcanvas-start"
-        tabIndex="-1"
-        id="mobileMenu"
-        aria-labelledby="mobileMenuLabel"
-      >
+      {/* Mobile Menu */}
+      <div className="offcanvas offcanvas-start" tabIndex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
         <div className="offcanvas-header">
           <h5 className="offcanvas-title" id="mobileMenuLabel">Menu</h5>
-          <button
-            type="button"
-            className="btn-close text-reset"
-            data-bs-dismiss="offcanvas"
-            aria-label="Close"
-          ></button>
+          <button type="button" className="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div className="offcanvas-body">
           <ul className="list-group">
-            <li className="list-group-item" onClick={() => navigate("/clerkdashboard")}>
-              <FaHome /> Home
-            </li>
-            <li className="list-group-item" onClick={() => navigate("/CaseRegistration")}>
-              <FaPlus /> Register Case
-            </li>
-            <li className="list-group-item" onClick={() => navigate("/submittedcases")}>
-              <FaClipboardList /> Submitted Cases
-            </li>
-            <li className="list-group-item" onClick={() => navigate("/notifications")}>
-              <FaBell /> Notifications
-            </li>
+            <li className="list-group-item" onClick={() => navigate("/clerkdashboard")}><FaHome /> Home</li>
+            <li className="list-group-item" onClick={() => navigate("/filenewcase")}><FaPlus /> Register Case</li>
+            <li className="list-group-item" onClick={() => navigate("/submittedcases")}><FaClipboardList /> Submitted Cases</li>
+            <li className="list-group-item" onClick={() => navigate("/notifications")}><FaBell /> Notifications</li>
           </ul>
         </div>
       </div>
 
-      {/* Main Content (unchanged) */}
+      {/* Sidebar + Main Content */}
       <div className="admin-content">
         <aside className="admin-sidebar d-none d-lg-block" style={{ width: "300px" }}>
           <ul className="admin-nav">
-            <li className="active" onClick={() => navigate("/clerkdashboard")}>
-              <FaHome /> Home
-            </li>
-            <li onClick={() => navigate("/CaseRegistration")}>
-              <FaPlus /> Register Case
-            </li>
-            <li onClick={() => navigate("/submittedcases")}>
-              <FaClipboardList /> Submitted Cases
-            </li>
-            <li onClick={() => navigate("/notifications")}>
-              <FaBell /> Notifications
-            </li>
+            <li className="active" onClick={() => navigate("/clerkdashboard")}><FaHome /> Home</li>
+            <li onClick={() => navigate("/caseregistration")}><FaPlus /> Register Case</li>
+            <li onClick={() => navigate("/submittedcases")}><FaClipboardList /> Submitted Cases</li>
+            <li onClick={() => navigate("/notifications")}><FaBell /> Notifications</li>
           </ul>
         </aside>
 
         <main className="admin-main">
-          {/* Stat Cards */}
           <section className="admin-grid">
-            <div className="admin-card stat-card total-cases">
-              <div className="stat-icon" style={{ fontSize: "3rem", color: "green" }}>
-                <FaClipboardList />
-              </div>
+            <div className="admin-card stat-card registered-cases">
+              <div className="stat-icon" style={{ fontSize: "3rem", color: "green" }}><FaClipboardList /></div>
               <div className="stat-info">
-                <h3>Total Submitted</h3>
-                <p>{submittedCases.length}</p>
+                <h3>Registered</h3>
+                <p>{caseStats.Registered || 0}</p>
               </div>
             </div>
-
-            <div className="admin-card stat-card approved-cases">
-              <div className="stat-icon" style={{ fontSize: "3rem", color: "blue" }}>
-                <FaCheck />
+            <div className="admin-card stat-card submitted-cases">
+              <div className="stat-icon" style={{ fontSize: "3rem", color: "blue" }}><FaCheck /></div>
+              <div className="stat-info">
+                <h3>Submitted</h3>
+                <p>{caseStats.Submitted || 0}</p>
               </div>
+            </div>
+            <div className="admin-card stat-card approved-cases">
+              <div className="stat-icon" style={{ fontSize: "3rem", color: "purple" }}><FaCheck /></div>
               <div className="stat-info">
                 <h3>Approved</h3>
                 <p>{caseStats.Approved || 0}</p>
               </div>
             </div>
-
-            <div className="admin-card stat-card pending-cases">
-              <div className="stat-icon" style={{ fontSize: "3rem", color: "orange" }}>
-                <FaEdit />
-              </div>
-              <div className="stat-info">
-                <h3>Pending Approval</h3>
-                <p>{caseStats.Pending || 0}</p>
-              </div>
-            </div>
           </section>
 
-          {/* Submitted Cases Table */}
+          {/* Registered Cases Table */}
           <section className="admin-card card-table" style={{ marginTop: "20px" }}>
-            <h3>Submitted Cases</h3>
+            <h3>Registered Cases</h3>
             <div style={{ margin: "1rem 0" }}>
               <input
                 type="text"
@@ -321,10 +260,7 @@ export default function ClerkDashboard() {
                       <td>{c.filedByName || "N/A"}</td>
                       <td>{c.status}</td>
                       <td>
-                        <button
-                          className="btn btn-edit"
-                          onClick={() => navigate(`/submittedcases/${c._id}`)}
-                        >
+                        <button className="btn btn-edit" onClick={() => navigate(`/submittedcases/${c._id}`)}>
                           <FaEdit /> View
                         </button>
                       </td>
@@ -332,9 +268,7 @@ export default function ClerkDashboard() {
                   ))}
                   {currentCases.length === 0 && (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center" }}>
-                        No submitted cases
-                      </td>
+                      <td colSpan="5" style={{ textAlign: "center" }}>No registered cases</td>
                     </tr>
                   )}
                 </tbody>
