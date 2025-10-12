@@ -90,7 +90,7 @@ useEffect(() => {
   // Fetch submitted cases
   const fetchSubmittedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/submitted");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/submitted");
       setSubmittedCases(res.data);
     } catch (err) {
       console.error("Error fetching submitted cases:", err);
@@ -100,7 +100,7 @@ useEffect(() => {
   // Fetch approved cases
   const fetchApprovedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/approved");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/approved");
       setApprovedCases(res.data);
     } catch (err) {
       console.error("Error fetching approved cases:", err);
@@ -110,7 +110,7 @@ useEffect(() => {
   // Fetch disapproved cases
   const fetchDisapprovedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/disapproved");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/disapproved");
       setDisapprovedCases(res.data);
     } catch (err) {
       console.error("Error fetching disapproved cases:", err);
@@ -120,7 +120,7 @@ useEffect(() => {
   // Fetch judges
   const fetchJudges = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/users/judges");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/users/judges");
       setJudges(res.data);
     } catch (err) {
       console.error("Error fetching judges:", err);
@@ -130,7 +130,7 @@ useEffect(() => {
   // Fetch stats
   const fetchStats = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/status-stats");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/status-stats");
       setCaseStats(res.data);
     } catch (err) {
       console.error("Error fetching stats:", err);
@@ -140,7 +140,7 @@ useEffect(() => {
   // Fetch notifications
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -155,7 +155,7 @@ useEffect(() => {
         return;
       }
       try {
-        await axios.post(`http://localhost:5000/api/cases/endorse/${caseId}`, {
+        await axios.post(`https://courtcase-backend.onrender.com/api/cases/endorse/${caseId}`, {
           judgeId: selectedJudge[caseId],
           registrarName: user.name,
         });

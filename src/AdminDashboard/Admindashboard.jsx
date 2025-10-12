@@ -66,11 +66,11 @@ export default function AdminDashboard() {
     async function fetchData() {
       try {
         const [usersRes, casesRes, closedRes, rolesRes, recentUsersRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/users/count'),
-          axios.get('http://localhost:5000/api/cases/count'),
-          axios.get('http://localhost:5000/api/cases/closed'),
-          axios.get('http://localhost:5000/api/users/roles/count'),
-          axios.get('http://localhost:5000/api/users/recent'), // Add this route in backend
+          axios.get('https://courtcase-backend.onrender.com/api/users/count'),
+          axios.get('https://courtcase-backend.onrender.com/api/cases/count'),
+          axios.get('https://courtcase-backend.onrender.com/api/cases/closed'),
+          axios.get('https://courtcase-backend.onrender.com/api/users/roles/count'),
+          axios.get('https://courtcase-backend.onrender.com/api/users/recent'), // Add this route in backend
         ]);
 
         setCounts({
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
   // Add markAsRead function
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.put(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: "Read" } : n

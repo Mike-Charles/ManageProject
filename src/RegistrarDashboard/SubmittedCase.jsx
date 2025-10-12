@@ -61,7 +61,7 @@ export default function SubmittedCases() {
 
   const fetchSubmittedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/submitted");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/submitted");
       setSubmittedCases(res.data);
     } catch (err) {
       console.error("Error fetching submitted cases:", err);
@@ -75,12 +75,12 @@ export default function SubmittedCases() {
 
     try {
       if (actionType === "approve") {
-        await axios.post(`http://localhost:5000/api/cases/approve/${actionCase._id}`, {
+        await axios.post(`https://courtcase-backend.onrender.com/api/cases/approve/${actionCase._id}`, {
           registrarName: user.name,
         });
         setSuccessMessage("The case has been approved!");
       } else if (actionType === "disapprove") {
-        await axios.post(`http://localhost:5000/api/cases/disapprove/${actionCase._id}`, {
+        await axios.post(`https://courtcase-backend.onrender.com/api/cases/disapprove/${actionCase._id}`, {
           registrarName: user.name,
         });
         setSuccessMessage("The case has been disapproved!");
@@ -104,7 +104,7 @@ export default function SubmittedCases() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error("Error fetching notifications:", err);

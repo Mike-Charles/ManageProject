@@ -117,7 +117,7 @@ const ClerkCaseRegistration = () => {
   // Submit case to registrar
   const handleConfirmSubmit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/cases/submit/${submitCaseId}`, {
+      await axios.put(`https://courtcase-backend.onrender.com/api/cases/submit/${submitCaseId}`, {
         clerkId: user._id,
         clerkName: user.name,
       });
@@ -137,7 +137,7 @@ const ClerkCaseRegistration = () => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/cases/registered/byClerk/${clerkId}`
+        `https://courtcase-backend.onrender.com/api/cases/registered/byClerk/${clerkId}`
       );
       setCases(res.data || []);
     } catch (err) {
@@ -151,7 +151,7 @@ const ClerkCaseRegistration = () => {
   const fetchNotifications = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/notifications/${userId}`
+        `https://courtcase-backend.onrender.com/api/notifications/${userId}`
       );
       setNotifications(res.data);
     } catch (err) {
@@ -163,7 +163,7 @@ const ClerkCaseRegistration = () => {
   const markAsRead = async (notificationId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/notifications/mark-read/${notificationId}`
+        `https://courtcase-backend.onrender.com/api/notifications/mark-read/${notificationId}`
       );
       setNotifications((prev) =>
         prev.map((n) =>
@@ -179,7 +179,7 @@ const ClerkCaseRegistration = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this case?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/cases/${id}`);
+        await axios.delete(`https://courtcase-backend.onrender.com/api/cases/${id}`);
         setCases(cases.filter((c) => c._id !== id));
       } catch (err) {
         console.error("Error deleting case:", err);

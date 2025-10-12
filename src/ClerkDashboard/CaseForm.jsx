@@ -168,7 +168,7 @@ export default function FileNewCase() {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/cases/create",
+        "https://courtcase-backend.onrender.com/api/cases/create",
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -51,7 +51,7 @@ export default function DisapprovedCases() {
 
   const fetchDisapprovedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/disapproved");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/disapproved");
       setDisapprovedCases(res.data);
     } catch (err) {
       console.error("Error fetching disapproved cases:", err);
@@ -60,7 +60,7 @@ export default function DisapprovedCases() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error("Error fetching notifications:", err);

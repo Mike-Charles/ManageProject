@@ -130,7 +130,7 @@ export default function ClerkDashboard() {
 const fetchCasesByClerk = async (clerkId) => {
   try {
     const res = await axios.get(
-      `http://localhost:5000/api/cases/all/byClerk/${clerkId}`
+      `https://courtcase-backend.onrender.com/api/cases/all/byClerk/${clerkId}`
     );
     setCases(res.data);
 
@@ -155,7 +155,7 @@ const fetchCasesByClerk = async (clerkId) => {
   const fetchNotifications = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/notifications/${userId}`
+        `https://courtcase-backend.onrender.com/api/notifications/${userId}`
       );
       setNotifications(res.data);
     } catch (err) {
@@ -167,7 +167,7 @@ const fetchCasesByClerk = async (clerkId) => {
   const markAsRead = async (notificationId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/notifications/markAsRead/${notificationId}`
+        `https://courtcase-backend.onrender.com/api/notifications/markAsRead/${notificationId}`
       );
       setNotifications((prev) =>
         prev.map((n) =>

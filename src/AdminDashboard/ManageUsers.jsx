@@ -31,7 +31,7 @@ export default function ManageUsers() {
   const markAsRead = async (notificationId) => {
     try {
       // Optionally, send a request to the server to mark as read
-      await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.put(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: "Read" } : n
@@ -53,7 +53,7 @@ export default function ManageUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/users');
+      const res = await axios.get('https://courtcase-backend.onrender.com/api/users');
       setUsers(res.data);
     } catch {
       console.error('Fetch error');
@@ -69,7 +69,7 @@ export default function ManageUsers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this user?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/users/${id}`);
+      await axios.delete(`https://courtcase-backend.onrender.com/api/users/${id}`);
       setUsers(users.filter((u) => u._id !== id));
     } catch (err) {
       alert('Failed to delete user');
@@ -92,7 +92,7 @@ export default function ManageUsers() {
 
   const handleEditSubmit = async (id) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/users/${id}`, editForm);
+      const res = await axios.put(`https://courtcase-backend.onrender.com/api/users/${id}`, editForm);
       const updatedUser = res.data;
       setUsers(users.map((u) => (u._id === id ? updatedUser : u)));
       setEditingUserId(null);

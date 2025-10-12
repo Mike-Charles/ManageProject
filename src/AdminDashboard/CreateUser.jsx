@@ -43,7 +43,7 @@ export default function CreateUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/users', form);
+      await axios.post('https://courtcase-backend.onrender.com/api/users', form);
       setMessage('✅ User created successfully!');
       setForm({ name: '', email: '', password: '', role: 'clerk' });
     } catch (err) {
@@ -61,7 +61,7 @@ export default function CreateUser() {
   const markAsRead = async (notificationId) => {
     try {
       // Optionally, send a request to update notification status on the server
-      await axios.patch(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.patch(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: "Read" } : n

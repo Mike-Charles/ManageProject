@@ -56,7 +56,7 @@ export default function ApprovedCases() {
   // Fetch approved cases
   const fetchApprovedCases = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/cases/approved");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/cases/approved");
       setApprovedCases(res.data);
     } catch (err) {
       console.error("Error fetching approved cases:", err);
@@ -66,7 +66,7 @@ export default function ApprovedCases() {
   // Fetch judges
   const fetchJudges = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/users/judges");
+      const res = await axios.get("https://courtcase-backend.onrender.com/api/users/judges");
       setJudges(res.data);
     } catch (err) {
       console.error("Error fetching judges:", err);
@@ -76,7 +76,7 @@ export default function ApprovedCases() {
   // Fetch notifications
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -90,7 +90,7 @@ export default function ApprovedCases() {
       return;
     }
     try {
-      await axios.post(`http://localhost:5000/api/cases/endorse/${caseId}`, {
+      await axios.post(`https://courtcase-backend.onrender.com/api/cases/endorse/${caseId}`, {
         judgeId: selectedJudge[caseId],
         registrarName: user.name,
       });

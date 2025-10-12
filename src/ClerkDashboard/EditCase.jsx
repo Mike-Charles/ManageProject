@@ -130,7 +130,7 @@ export default function EditCase() {
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/notifications", {
+        const res = await axios.get("https://courtcase-backend.onrender.com/api/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setNotifications(res.data);
@@ -145,7 +145,7 @@ export default function EditCase() {
   const markAsRead = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/notifications/${id}/read`, {}, {
+      await axios.put(`https://courtcase-backend.onrender.com/api/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications((prev) =>
@@ -166,7 +166,7 @@ export default function EditCase() {
   useEffect(() => {
     const fetchCase = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/cases/${caseId}`);
+        const res = await axios.get(`https://courtcase-backend.onrender.com/api/cases/${caseId}`);
         const c = res.data;
         setFormData({
           title: c.title || "",
@@ -254,7 +254,7 @@ export default function EditCase() {
       };
 
       await axios.put(
-        `http://localhost:5000/api/cases/${caseId}`,
+        `https://courtcase-backend.onrender.com/api/cases/${caseId}`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

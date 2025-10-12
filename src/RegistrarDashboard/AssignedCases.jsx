@@ -47,7 +47,7 @@ export default function AssignedCases() {
   const fetchAssignedCases = async (registrarId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/cases/assigned-to-registrar/${registrarId}`
+        `https://courtcase-backend.onrender.com/cases/assigned-to-registrar/${registrarId}`
       );
       const assignedCases = res.data;
       setCases(assignedCases);
@@ -56,7 +56,7 @@ export default function AssignedCases() {
       for (const c of assignedCases) {
         if (c.assignedJudge?._id) {
           await axios.post(
-            `http://localhost:5000/api/notifications/create`,
+            `https://courtcase-backend.onrender.com/notifications/create`,
             {
               userId: c.assignedJudge._id,
               caseId: c._id,
@@ -74,7 +74,7 @@ export default function AssignedCases() {
   const fetchNotifications = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/notifications/${userId}`
+        `https://courtcase-backend.onrender.com/notifications/${userId}`
       );
       setNotifications(res.data);
     } catch (err) {
