@@ -22,6 +22,7 @@ import CaseForm from './ClerkDashboard/CaseForm'
 import SubmittedCase from './RegistrarDashboard/SubmittedCase'
 import ApprovedCases from './RegistrarDashboard/ApprovedCases'
 import DisapprovedCases from './RegistrarDashboard/DisapprovedCases'
+import EditCase from './ClerkDashboard/EditCase'
 
 
 
@@ -39,6 +40,7 @@ function App() {
           <Route path='/caseregistration' element={<CaseRegistration />}></Route>
           <Route path='/clerkdashboard' element={<ClerkDashboard />}></Route>
           <Route path='/caseform' element={<CaseForm />}></Route>
+          <Route path='/editcase/:caseId' element={<EditCase />}></Route>
           
 
 

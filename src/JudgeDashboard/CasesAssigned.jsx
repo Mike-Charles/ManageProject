@@ -14,6 +14,8 @@ import {
   FaGavel,
   FaEdit,
   FaChartPie,
+  FaEye,
+  
 } from 'react-icons/fa';
 import './JudgeDashboard.css';
 
@@ -30,6 +32,7 @@ export default function AssignedCases() {
   const userDropdownRef = useRef();
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationsRef = useRef();
+    const [viewCase, setViewCase] = useState(null); // Case to view in modal
 
   // Mark notification as read
   const markAsRead = async (notificationId) => {
@@ -359,7 +362,7 @@ export default function AssignedCases() {
                     <th>Description</th>
                     <th>Filed By</th>
                     <th>Status</th>
-                    <th>Hearing Date</th>
+      
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -370,15 +373,26 @@ export default function AssignedCases() {
                       <td>{c.description}</td>
                       <td>{c.filedByName || 'N/A'}</td>
                       <td>{c.status || 'Assigned'}</td>
-                      <td>{c.hearingDate ? new Date(c.hearingDate).toLocaleDateString() : 'N/A'}</td>
                       <td>
                         <button
-                          className="btn btn-edit"
+                          className="btn btn-sm btn-primary me-2 btn-create"
+                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
+                          onClick={() => setViewCase(c)}
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewCaseModal"
+                        >
+                          <FaEye /> View
+                        </button>
+        
+                        <button
+                          className="btn btn-create"
+                          style={{ backgroundColor: "blue", color: "white", borderRadius: 30, cursor: "pointer", hover: { backgroundColor: "#0056b3" } }}
                           onClick={() => navigate('/schedulenewhearing', { state: { caseId: c._id } })}
                         >
                           <FaEdit /> Schedule
                         </button>
                       </td>
+
                     </tr>
                   ))}
                   {currentCases.length === 0 && (
@@ -403,6 +417,54 @@ export default function AssignedCases() {
               ))}
             </div>
           </section>
+            {/* View Case Modal */}
+          <div className="modal fade" id="viewCaseModal" tabIndex="-1" aria-labelledby="viewCaseModalLabel" aria-hidden="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header text-white" style={{ backgroundColor: "lightblue" }}>
+                  <h5 className="modal-title" id="viewCaseModalLabel">Case Details</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                  {viewCase ? (
+                    <div className="container">
+                      <div className="row mb-3">
+                        <div className="col-md-6"><strong>Case Title:</strong> {viewCase.title}</div>
+                        <div className="col-md-6"><strong>Filing Date:</strong> {new Date(viewCase.filingDate).toLocaleDateString()}</div>
+                      </div>
+                      <div className="row mb-3">
+                        <div className="col-md-12"><strong>Description:</strong> {viewCase.description}</div>
+                      </div>
+                      <div className="row mb-3">
+                        <div className="col-md-6"><strong>Filed By:</strong> {viewCase.filedByName}</div>
+                        <div className="col-md-6"><strong>Status:</strong> {viewCase.status}</div>
+                      </div>
+                      <hr />
+                      <div className="row mb-3">
+                        <div className="col-md-6">
+                          <h6>Plaintiff</h6>
+                          <p><strong>Name:</strong> {viewCase.plaintiff?.name}</p>
+                          <p><strong>Address:</strong> {viewCase.plaintiff?.address}</p>
+                          <p><strong>Phone:</strong> {viewCase.plaintiff?.phone}</p>
+                          <p><strong>Email:</strong> {viewCase.plaintiff?.email}</p>
+                        </div>
+                        <div className="col-md-6">
+                          <h6>Defendant</h6>
+                          <p><strong>Name:</strong> {viewCase.defendant?.name}</p>
+                          <p><strong>Address:</strong> {viewCase.defendant?.address}</p>
+                          <p><strong>Phone:</strong> {viewCase.defendant?.phone}</p>
+                          <p><strong>Email:</strong> {viewCase.defendant?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p>No case selected</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div> 
+
         </main>
       </div>
     </div>

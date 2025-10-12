@@ -1,6 +1,6 @@
-// File: FileNewCase.jsx
+// File: EditCase.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import {
   FaUserCircle,
@@ -9,29 +9,35 @@ import {
   FaChevronDown,
   FaLock,
   FaHome,
-  FaPlus,
   FaClipboardList,
+  FaPlus,
+  FaSearch,
+  FaFileUpload,
+  FaCloudUploadAlt,
+  FaTimes,
+  FaCheckCircle,
+  FaEye
+  
 } from "react-icons/fa";
 import "./FileNewCase.css";
 
-export default function FileNewCase() {
+export default function EditCase() {
   const navigate = useNavigate();
+  const { caseId } = useParams();
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const userDropdownRef = useRef();
-
-  // ✅ Added missing state variables for header functionality
-  const [searchTerm, setSearchTerm] = useState("");
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const userDropdownRef = useRef();
   const notificationsRef = useRef();
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    filingDate: new Date().toISOString().split("T")[0],
-    status: "Registered",
+    filingDate: "",
+    status: "",
     plaintiffName: "",
     plaintiffAddress: "",
     plaintiffPhone: "",
@@ -46,7 +52,11 @@ export default function FileNewCase() {
   const [message, setMessage] = useState("");
   const [uploading, setUploading] = useState(false);
 
-  // ✅ Load user + mock notifications + outside click detection
+
+
+
+
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) return navigate("/login");
@@ -91,18 +101,97 @@ export default function FileNewCase() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [navigate]);
 
-  const markAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) =>
-        n._id === id ? { ...n, status: "Read" } : n
-      )
-    );
+
+
+
+
+  // Load user and setup outside click handlers
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return navigate("/login");
+    const parsedUser = JSON.parse(storedUser);
+    if (parsedUser.role !== "clerk") return navigate("/unauthorized");
+    setUser(parsedUser);
+
+    const handleClickOutside = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [navigate]);
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/notifications", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setNotifications(res.data);
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  // Mark notification as read
+  const markAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`http://localhost:5000/api/notifications/${id}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, status: "Read" } : n))
+      );
+    } catch (err) {
+      console.error("Error marking notification:", err);
+    }
   };
 
+  // Search (not fully needed yet)
   const handleSearch = (e) => {
     e.preventDefault();
-    alert(`Searching for: ${searchTerm}`);
+    console.log("Searching for:", searchTerm);
   };
+
+  // Fetch case details
+  useEffect(() => {
+    const fetchCase = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/cases/${caseId}`);
+        const c = res.data;
+        setFormData({
+          title: c.title || "",
+          description: c.description || "",
+          filingDate: c.filingDate
+            ? c.filingDate.split("T")[0]
+            : new Date().toISOString().split("T")[0],
+          status: c.status || "Registered",
+          plaintiffName: c.plaintiff?.name || "",
+          plaintiffAddress: c.plaintiff?.address || "",
+          plaintiffPhone: c.plaintiff?.phone || "",
+          plaintiffEmail: c.plaintiff?.email || "",
+          defendantName: c.defendant?.name || "",
+          defendantAddress: c.defendant?.address || "",
+          defendantPhone: c.defendant?.phone || "",
+          defendantEmail: c.defendant?.email || "",
+          document: c.document || "",
+        });
+      } catch (err) {
+        console.error("Error fetching case:", err);
+        setMessage("❌ Failed to load case details.");
+      }
+    };
+    fetchCase();
+  }, [caseId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -112,7 +201,6 @@ export default function FileNewCase() {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
     if (!allowedTypes.includes(file.type)) {
       alert("Only JPG, PNG, and PDF files are allowed.");
@@ -121,12 +209,12 @@ export default function FileNewCase() {
 
     const formDataCloud = new FormData();
     formDataCloud.append("file", file);
-    formDataCloud.append("upload_preset", "your_upload_preset_here"); // replace with your Cloudinary preset
+    formDataCloud.append("upload_preset", "your_upload_preset_here");
 
     try {
       setUploading(true);
       const res = await axios.post(
-        "https://api.cloudinary.com/v1_1/https://drive.google.com/drive/folders/1Cd1LQjD14WAgkM-yeZ8fMq4fHv-pcFJz?usp=drive_link/upload",
+        "https://api.cloudinary.com/v1_1/your_cloud_name_here/upload",
         formDataCloud
       );
       setFormData((prev) => ({ ...prev, document: res.data.secure_url }));
@@ -145,11 +233,11 @@ export default function FileNewCase() {
 
     try {
       const token = localStorage.getItem("token");
-
       const payload = {
         title: formData.title,
         description: formData.description,
         filingDate: formData.filingDate,
+        status: formData.status,
         plaintiff: {
           name: formData.plaintiffName,
           address: formData.plaintiffAddress,
@@ -162,40 +250,20 @@ export default function FileNewCase() {
           phone: formData.defendantPhone,
           email: formData.defendantEmail,
         },
-        filedByName: user?.name || "Unknown Clerk",
-        registeredBy: user?._id,
         document: formData.document,
       };
 
-      const response = await axios.post(
-        "http://localhost:5000/api/cases/create",
+      await axios.put(
+        `http://localhost:5000/api/cases/${caseId}`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMessage(
-        `Case Registered successfully! Case Number: ${response.data.caseNumber}`
-      );
-
-      // reset form
-      setFormData({
-        title: "",
-        description: "",
-        filingDate: new Date().toISOString().split("T")[0],
-        status: "Registered",
-        plaintiffName: "",
-        plaintiffAddress: "",
-        plaintiffPhone: "",
-        plaintiffEmail: "",
-        defendantName: "",
-        defendantAddress: "",
-        defendantPhone: "",
-        defendantEmail: "",
-        document: "",
-      });
+      setMessage("✅ Case updated successfully!");
+      navigate(-1);
     } catch (err) {
       console.error(err);
-      setMessage("Error registering case. Please try again.");
+      setMessage("❌ Error updating case. Please try again.");
     }
   };
 
@@ -218,11 +286,7 @@ export default function FileNewCase() {
         }}
       >
         <nav className="navbar navbar-expand-lg navbar-light bg-light px-3">
-          <a
-            className="navbar-brand fw-bold"
-            href="#"
-            style={{ color: "#007bff" }}
-          >
+          <a className="navbar-brand fw-bold" href="#" style={{ color: "#007bff" }}>
             CourtSys
           </a>
 
@@ -236,10 +300,7 @@ export default function FileNewCase() {
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          <div
-            className="collapse navbar-collapse d-none d-lg-flex justify-content-end"
-            style={{ display: "flex", justifyContent: "space-evenly" }}
-          >
+          <div className="collapse navbar-collapse d-none d-lg-flex justify-content-end">
             <div style={{ marginLeft: 250 }}>
               <form
                 className="d-flex mx-3"
@@ -260,10 +321,7 @@ export default function FileNewCase() {
 
             <div className="navbar-collapse d-none d-lg-flex justify-content-end">
               {/* Notifications */}
-              <div
-                className="nav-item me-3 position-relative"
-                ref={notificationsRef}
-              >
+              <div className="nav-item me-3 position-relative" ref={notificationsRef}>
                 <FaBell
                   size={22}
                   style={{ cursor: "pointer" }}
@@ -299,9 +357,7 @@ export default function FileNewCase() {
                           onClick={() => markAsRead(n._id)}
                         >
                           <strong>{n.title || "New Case Assigned"}</strong>
-                          <p style={{ margin: 0, fontSize: "0.85rem" }}>
-                            {n.message}
-                          </p>
+                          <p style={{ margin: 0, fontSize: "0.85rem" }}>{n.message}</p>
                           <small className="text-muted">
                             {new Date(n.sentAt).toLocaleString()}
                           </small>
@@ -312,7 +368,7 @@ export default function FileNewCase() {
                 )}
               </div>
 
-              {/* User */}
+              {/* User Dropdown */}
               <div className="position-relative" ref={userDropdownRef}>
                 <button
                   className="btn btn-light d-flex align-items-center"
@@ -369,28 +425,16 @@ export default function FileNewCase() {
           </div>
           <div className="offcanvas-body">
             <ul className="list-group">
-              <li
-                className="list-group-item"
-                onClick={() => navigate("/clerkdashboard")}
-              >
+              <li className="list-group-item" onClick={() => navigate("/clerkdashboard")}>
                 <FaHome /> Home
               </li>
-              <li
-                className="list-group-item"
-                onClick={() => navigate("/filenewcase")}
-              >
+              <li className="list-group-item" onClick={() => navigate("/filenewcase")}>
                 <FaPlus /> File New Case
               </li>
-              <li
-                className="list-group-item"
-                onClick={() => navigate("/submittedcases")}
-              >
+              <li className="list-group-item" onClick={() => navigate("/submittedcases")}>
                 <FaClipboardList /> Submitted Cases
               </li>
-              <li
-                className="list-group-item"
-                onClick={() => navigate("/notifications")}
-              >
+              <li className="list-group-item" onClick={() => navigate("/notifications")}>
                 <FaBell /> Notifications
               </li>
             </ul>
@@ -400,19 +444,13 @@ export default function FileNewCase() {
 
       {/* MAIN CONTENT */}
       <div className="admin-content" style={{ padding: 0 }}>
-        <aside
-          className="admin-sidebar d-none d-lg-block"
-          style={{ width: "300px" }}
-        >
+        <aside className="admin-sidebar d-none d-lg-block" style={{ width: "300px" }}>
           <ul className="admin-nav">
-            <li
-              className="list-group-item"
-              onClick={() => navigate("/clerkdashboard")}
-            >
+            <li onClick={() => navigate("/clerkdashboard")}>
               <FaHome /> Home
             </li>
             <li className="active" onClick={() => navigate("/caseregistration")}>
-              <FaPlus /> File New Case
+              <FaPlus /> Register Case
             </li>
             <li onClick={() => navigate("/submittedcases")}>
               <FaClipboardList /> Submitted Cases
@@ -426,7 +464,6 @@ export default function FileNewCase() {
         <main className="admin-main">
           <div className="file-case-container compact-horizontal">
             <form onSubmit={handleSubmit} className="file-case-form-compact">
-              {/* Case Info */}
               <div className="form-section">
                 <h4>Case Info</h4>
                 <input
@@ -443,21 +480,10 @@ export default function FileNewCase() {
                   value={formData.description}
                   onChange={handleChange}
                 ></textarea>
-                <input
-                  type="date"
-                  name="filingDate"
-                  value={formData.filingDate}
-                  readOnly
-                />
-                <input
-                  type="text"
-                  name="status"
-                  value={formData.status}
-                  readOnly
-                />
+                <input type="date" name="filingDate" value={formData.filingDate} readOnly />
+                <input type="text" name="status" value={formData.status} readOnly />
               </div>
 
-              {/* Plaintiff */}
               <div className="form-section">
                 <h4>Plaintiff</h4>
                 <input
@@ -491,7 +517,6 @@ export default function FileNewCase() {
                 />
               </div>
 
-              {/* Defendant */}
               <div className="form-section">
                 <h4>Defendant</h4>
                 <input
@@ -525,7 +550,6 @@ export default function FileNewCase() {
                 />
               </div>
 
-              {/* Filed By & Document */}
               <div className="form-section">
                 <h4>Filed By</h4>
                 <input type="text" value={user?.name || ""} readOnly />
@@ -535,31 +559,22 @@ export default function FileNewCase() {
                 {formData.document && (
                   <p>
                     Uploaded:{" "}
-                    <a
-                      href={formData.document}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
+                    <a href={formData.document} target="_blank" rel="noreferrer">
                       View Document
                     </a>
                   </p>
                 )}
               </div>
 
-              {/* Actions */}
               <div className="form-actions">
                 <button type="submit" disabled={uploading}>
-                  Submit
+                  Update Case
                 </button>
-                <button
-                  type="reset"
-                  onClick={() => window.location.reload()}
-                >
-                  Reset
+                <button type="button" onClick={() => navigate(-1)}>
+                  Cancel
                 </button>
               </div>
 
-              {/* Messages */}
               {message && <p className="form-message">{message}</p>}
             </form>
           </div>

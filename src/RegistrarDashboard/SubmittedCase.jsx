@@ -13,6 +13,8 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaCheckCircle,
+  FaEye
+  
 } from "react-icons/fa";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
@@ -24,6 +26,9 @@ export default function SubmittedCases() {
   const [notifications, setNotifications] = useState([]);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [viewCase, setViewCase] = useState(null); // Case to view in modal
+  const [actionCase, setActionCase] = useState(null); // case for approve/disapprove
+  const [actionType, setActionType] = useState(""); // "approve" or "disapprove"
+  const [successMessage, setSuccessMessage] = useState(""); // inline message
 
   const userDropdownRef = useRef();
 
@@ -63,6 +68,40 @@ export default function SubmittedCases() {
     }
   };
 
+
+    // Confirmed action
+  const handleActionConfirm = async () => {
+    if (!actionCase || !actionType) return;
+
+    try {
+      if (actionType === "approve") {
+        await axios.post(`http://localhost:5000/api/cases/approve/${actionCase._id}`, {
+          registrarName: user.name,
+        });
+        setSuccessMessage("The case has been approved!");
+      } else if (actionType === "disapprove") {
+        await axios.post(`http://localhost:5000/api/cases/disapprove/${actionCase._id}`, {
+          registrarName: user.name,
+        });
+        setSuccessMessage("The case has been disapproved!");
+      }
+
+      setActionCase(null);
+      setActionType("");
+      fetchSubmittedCases();
+
+      // Remove message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+    } catch (err) {
+      console.error("Error performing action:", err);
+      setActionCase(null);
+      setActionType("");
+    }
+  };
+
+
+
   const fetchNotifications = async (userId) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
@@ -72,31 +111,7 @@ export default function SubmittedCases() {
     }
   };
 
-  const approveCase = async (caseId) => {
-    try {
-      await axios.post(`http://localhost:5000/api/cases/approve/${caseId}`, {
-        registrarName: user.name,
-      });
-      alert("Case approved successfully!");
-      fetchSubmittedCases();
-    } catch (err) {
-      console.error("Error approving case:", err);
-      alert("Failed to approve case");
-    }
-  };
 
-  const disapproveCase = async (caseId) => {
-    try {
-      await axios.post(`http://localhost:5000/api/cases/disapprove/${caseId}`, {
-        registrarName: user.name,
-      });
-      alert("Case disapproved successfully!");
-      fetchSubmittedCases();
-    } catch (err) {
-      console.error("Error disapproving case:", err);
-      alert("Failed to disapprove case");
-    }
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -282,7 +297,17 @@ export default function SubmittedCases() {
         {/* Main Content */}
         <main className="admin-main">
           <section className="admin-card card-table">
+            
+
             <h3>Submitted Cases</h3>
+            
+            {/* Inline Success Message */}
+            {successMessage && (
+              <div className="alert alert-success mt-2" role="alert">
+                {successMessage}
+              </div>
+            )}
+            
             <div className="table-responsive table-card">
               <table className="table table-striped">
                 <thead>
@@ -290,7 +315,6 @@ export default function SubmittedCases() {
                     <th>Case Number</th>
                     <th>Title</th>
                     <th>Description</th>
-                    <th>Filed By</th>
                     <th>Approve/Disapprove</th>
                   </tr>
                 </thead>
@@ -300,26 +324,33 @@ export default function SubmittedCases() {
                       <td>{c.caseNumber || c._id}</td>
                       <td>{c.title}</td>
                       <td>{c.description}</td>
-                      <td>{c.filedByName || "N/A"}</td>
                       <td>
                         <div className="action-buttons" style={{ display: "flex", gap: "10px" }}>
                           <button
-                            style={{ backgroundColor: "green", color: "white", borderRadius: 40 }}
-                            className="btn btn-approve"
-                            onClick={() => approveCase(c._id)}
+                          style={{ backgroundColor: "#388E3C", color: "white", borderRadius: 40, display: "flex", gap: "0", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer" }}
+                            onClick={() => {
+                              setActionCase(c);
+                              setActionType("approve");
+                            }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#actionConfirmModal"
                           >
                             <FaCheckCircle />
                           </button>
                           <button
-                            style={{ backgroundColor: "red", color: "white", borderRadius: 40 }}
-                            className="btn btn-disapprove"
-                            onClick={() => disapproveCase(c._id)}
+                          style={{ backgroundColor: "#D32F2F", color: "white", borderRadius: 40, display: "flex", gap: "0", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer" }}
+                            onClick={() => {
+                              setActionCase(c);
+                              setActionType("disapprove");
+                            }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#actionConfirmModal"
                           >
                             <FaTimesCircle />
                           </button>
                           <button
                             className="btn btn-sm btn-primary me-2"
-                            style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
+                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer" }}
                             onClick={() => setViewCase(c)}
                             data-bs-toggle="modal"
                             data-bs-target="#viewCaseModal"
@@ -388,6 +419,38 @@ export default function SubmittedCases() {
               </div>
             </div>
           </div>
+                    {/* Action Confirmation Modal */}
+          <div className="modal fade" id="actionConfirmModal" tabIndex="-1" aria-hidden="true">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    {actionType === "approve" ? "Approve Case" : "Disapprove Case"}
+                  </h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                  Are you sure you want to {actionType} this case?
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn ${actionType === "approve" ? "btn-success" : "btn-danger"}`}
+                    onClick={() => {
+                      handleActionConfirm();
+                      window.bootstrap.Modal.getInstance(document.getElementById('actionConfirmModal')).hide();
+                    }}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </main>
       </div>
     </div>

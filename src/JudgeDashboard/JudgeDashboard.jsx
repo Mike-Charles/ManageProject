@@ -95,14 +95,19 @@ export default function JudgeDashboard() {
     }
   };
 
-  const fetchStats = async (judgeId) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/cases/status-stats/judge/${judgeId}`);
-      setCaseStats(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+const fetchStats = async (judgeId) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/schedules/status-stats/judge/${judgeId}`
+    );
+    setCaseStats(res.data);
+  } catch (err) {
+    console.error("Error fetching stats:", err);
+  }
+};
+
+
+
 
   const fetchNotifications = async (userId) => {
     try {
@@ -390,7 +395,7 @@ export default function JudgeDashboard() {
                       <td>
                         <button
                           className="btn btn-sm btn-primary me-2"
-                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
+                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer"}}
                           onClick={() => setViewCase(c)}
                           data-bs-toggle="modal"
                           data-bs-target="#viewCaseModal"

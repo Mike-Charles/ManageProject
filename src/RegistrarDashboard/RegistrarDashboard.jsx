@@ -40,11 +40,13 @@ export default function RegistrarDashboard() {
   const [approvedCases, setApprovedCases] = useState([]);
   const [disapprovedCases, setDisapprovedCases] = useState([]);
   const [judges, setJudges] = useState([]);
-  const [selectedJudges, setSelectedJudges] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [caseStats, setCaseStats] = useState({});
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [viewCase, setViewCase] = useState(null); // Case to view in modal
+  const [selectedJudge, setSelectedJudge] = useState({});
+  
+  
 
 
 
@@ -145,21 +147,38 @@ useEffect(() => {
     }
   };
 
-  // Endorse case
-  const endorseCase = async (caseId, judgeId) => {
-    if (!judgeId) return alert("Please select a judge first.");
-    try {
-      await axios.post(`http://localhost:5000/api/cases/endorse/${caseId}`, {
-        judgeId,
-        registrarName: user.name,
-      });
-      alert("Case endorsed and judge assigned!");
-      fetchApprovedCases();
-    } catch (err) {
-      console.error("Endorsement failed:", err);
-      alert("Error endorsing case");
-    }
-  };
+
+
+    const handleAssign = async (caseId) => {
+      if (!selectedJudge[caseId]) {
+        alert("Please select a judge before assigning.");
+        return;
+      }
+      try {
+        await axios.post(`http://localhost:5000/api/cases/endorse/${caseId}`, {
+          judgeId: selectedJudge[caseId],
+          registrarName: user.name,
+        });
+        setApprovedCases((prev) =>
+          prev.map((c) =>
+            c._id === caseId
+              ? { ...c, successMessage: "Judge assigned successfully!" }
+              : c
+          )
+        );
+        setTimeout(() => {
+          setApprovedCases((prev) =>
+            prev.map((c) =>
+              c._id === caseId ? { ...c, successMessage: "" } : c
+            )
+          );
+        }, 3000);
+      } catch (err) {
+        console.error("Error assigning judge:", err);
+        alert("Error assigning judge");
+      }
+    };
+  
 
   // Logout
   const handleLogout = () => {
@@ -382,7 +401,7 @@ useEffect(() => {
                 <FaClipboardList />
               </div>
               <div className="stat-info">
-                <h3>Total Submitted Cases</h3>
+                <h3 style={{ fontSize: "18px"}}> Submitted Cases</h3>
                 <p>{submittedCases.length}</p>
               </div>
             </div>
@@ -394,19 +413,19 @@ useEffect(() => {
                 <FaGavel />
               </div>
               <div className="stat-info">
-                <h3>Approved Cases</h3>
+                <h3 style={{ fontSize: "18px"}}>Approved Cases</h3>
                 <p>{approvedCases.length}</p>
               </div>
             </div>
             <div className="admin-card stat-card">
               <div
                 className="stat-icon"
-                style={{ fontSize: "3rem", color: "red" }}
+                style={{ fontSize: "3rem", color: "#D32F2F" }}
               >
                 <FaTimesCircle />
               </div>
               <div className="stat-info">
-                <h3>Disapproved Cases</h3>
+                <h3 style={{ fontSize: "16px"}}>Disapproved Cases</h3>
                 <p>{disapprovedCases.length}</p>
               </div>
             </div>
@@ -421,7 +440,6 @@ useEffect(() => {
                   <tr>
                     <th>Title</th>
                     <th>Description</th>
-                    <th>Filed By</th>
                     <th>Assign Judge</th>
                     <th>Action</th>
                   </tr>
@@ -431,55 +449,73 @@ useEffect(() => {
                     <tr key={c._id}>
                       <td>{c.title}</td>
                       <td>{c.description}</td>
-                      <td>{c.filedByName || "N/A"}</td>
-                      <td>
+                      <td style={{ minWidth: "180px" }}>
                         <select
                           className="form-select"
-                          value={selectedJudges[c._id] || ""}
+                          value={selectedJudge[c._id] || ""}
                           onChange={(e) =>
-                            setSelectedJudges((prev) => ({
+                            setSelectedJudge((prev) => ({
                               ...prev,
                               [c._id]: e.target.value,
                             }))
                           }
                         >
                           <option value="">-- Select Judge --</option>
-                          {judges.map((j) => (
-                            <option key={j._id} value={j._id}>
-                              {j.name}
+                          {judges.map((judge) => (
+                            <option key={judge._id} value={judge._id}>
+                              {judge.fullName || judge.name}
                             </option>
                           ))}
                         </select>
+                        {c.successMessage && (
+                          <div
+                            style={{
+                              color: "green",
+                              marginTop: "5px",
+                              fontWeight: "bold",
+                              fontSize: "0.9rem",
+                            }}
+                          >
+                            {c.successMessage}
+                          </div>
+                        )}
                       </td>
                       <td>
-                        <button
-                          className="btn btn-sm btn-primary me-2"
-                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
-                          onClick={() => setViewCase(c)}
-                          data-bs-toggle="modal"
-                          data-bs-target="#viewCaseModal"
-                        >
-                          <FaEye /> View
-                        </button>
-                        <button
-                          style={{ backgroundColor: "green", color: "white", borderRadius: 30 }}
-                          onClick={() => endorseCase(c._id, selectedJudges[c._id])}
-                          className="btn btn-sm"
-                        >
-                          Assign
-                        </button>
+                        <div className="d-flex">
+                          <button
+                            className="btn btn-sm btn-primary me-2"
+                            style={{ backgroundColor: "grey", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer" }}
+                            onClick={() => setViewCase(c)}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewCaseModal"
+                          >
+                            <FaEye /> View
+                          </button>
+                          <button
+                            style={{ backgroundColor: "#388E3C", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer"}}
+                            onClick={() => handleAssign(c._id)}
+                            className="btn btn-success"
+                          >
+                            Assign
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                   {approvedCases.length === 0 && (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center" }}>No cases ready for assignment</td>
+                      <td colSpan="6" style={{ textAlign: "center" }}>
+                        No approved cases found
+                      </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
           </section>
+
+
+
           {/* View Case Modal */}
           <div className="modal fade" id="viewCaseModal" tabIndex="-1" aria-labelledby="viewCaseModalLabel" aria-hidden="true">
             <div className="modal-dialog modal-lg modal-dialog-centered">

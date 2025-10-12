@@ -338,7 +338,7 @@ export default function ApprovedCases() {
                       </td>
                       <td>
                         <button
-                          style={{ backgroundColor: "green", color: "white", borderRadius: 30 }}
+                          style={{ backgroundColor: "#388E3C", color: "white", borderRadius: 30 }}
                           onClick={() => handleAssign(c._id)}
                           className="btn btn-success"
                         >
