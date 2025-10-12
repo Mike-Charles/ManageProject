@@ -374,40 +374,56 @@ const fetchStats = async (judgeId) => {
               />
             </div>
 
-            <div className="table-responsive table-card">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Filed By</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentCases.map((c) => (
-                    <tr key={c._id}>
-                      <td>{c.title}</td>
-                      <td>{c.description}</td>
-                      <td>{c.filedByName || "N/A"}</td>
-                      <td>{c.status || "Assigned"}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-primary me-2"
-                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer"}}
-                          onClick={() => setViewCase(c)}
-                          data-bs-toggle="modal"
-                          data-bs-target="#viewCaseModal"
-                        >
-                          <FaEye /> View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ul className="notifications-gmail-style">
+              {currentCases.map((c) => (
+                <section
+                  key={c._id}
+                  className="mb-2"
+                  style={{
+                    backgroundColor: "white",
+                    padding: 10,
+                    borderRadius: 8,
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div className="d-flex align-items-center mb-1">
+                        <FaClipboardList className="me-2 text-primary" />
+                        <strong>{c.title}</strong>
+                      </div>
+                      <p style={{ margin: 0 }}>{c.description}</p>
+                      <small className="text-muted d-block">
+                        Filed By: {c.filedByName || "N/A"} | Status: {c.status || "Assigned"}
+                      </small>
+                    </div>
+                    <div className="d-flex flex-column align-items-end">
+                      <small className="text-muted">{new Date(c.filingDate).toLocaleString()}</small>
+                      <button
+                        className="btn btn-sm btn-primary mt-2"
+                        style={{
+                          backgroundColor: "grey",
+                          color: "white",
+                          borderRadius: 30,
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                          padding: "6px 12px",
+                          border: "none",
+                        }}
+                        onClick={() => setViewCase(c)}
+                        data-bs-toggle="modal"
+                        data-bs-target="#viewCaseModal"
+                      >
+                        <FaEye /> View
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              ))}
+              {currentCases.length === 0 && <p>No assigned cases found.</p>}
+            </ul>
 
             {/* Pagination */}
             <div className="pagination">
@@ -422,6 +438,7 @@ const fetchStats = async (judgeId) => {
               ))}
             </div>
           </section>
+
             {/* View Case Modal */}
           <div className="modal fade" id="viewCaseModal" tabIndex="-1" aria-labelledby="viewCaseModalLabel" aria-hidden="true">
             <div className="modal-dialog modal-lg modal-dialog-centered">
@@ -473,43 +490,39 @@ const fetchStats = async (judgeId) => {
           {/* Upcoming Hearings Table */}
           <section className="admin-card card-table" style={{ marginTop: "20px" }}>
             <h3>Upcoming Hearings</h3>
-            <div className="table-responsive table-card">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Case Number</th>
-                    <th>Title</th>
-                    <th>Start Date</th>
-                    <th>Start Time</th>
-                    <th>End Date</th>
-                    <th>End Time</th>
-                    <th>Room</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentHearings.map((h) => (
-                    <tr key={h._id}>
-                      <td>{h.caseId?.caseNumber || "N/A"}</td>
-                      <td>{h.caseId?.title || "N/A"}</td>
-                      <td>{new Date(h.startDate).toLocaleDateString()}</td>
-                      <td>{h.startTime}</td>
-                      <td>{new Date(h.endDate).toLocaleDateString()}</td>
-                      <td>{h.endTime}</td>
-                      <td>{h.room}</td>
-                      <td>{h.status}</td>
-                    </tr>
-                  ))}
-                  {currentHearings.length === 0 && (
-                    <tr>
-                      <td colSpan="8" style={{ textAlign: "center" }}>
-                        No hearings scheduled
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <ul className="notifications-gmail-style">
+              {currentHearings.length > 0 ? (
+                currentHearings.map((h) => (
+                  <section
+                    key={h._id}
+                    className="mb-2"
+                    style={{
+                      backgroundColor: "white",
+                      padding: 10,
+                      borderRadius: 8,
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="d-flex align-items-center mb-1">
+                          <FaCalendarAlt className="me-2 text-warning" />
+                          <strong>{h.caseId?.title || "N/A"}</strong>
+                        </div>
+                        <small className="text-muted d-block">
+                          Case Number: {h.caseId?.caseNumber || "N/A"} | Room: {h.room} | Status: {h.status}
+                        </small>
+                        <small className="text-muted d-block">
+                          {new Date(h.startDate).toLocaleDateString()} {h.startTime} – {new Date(h.endDate).toLocaleDateString()} {h.endTime}
+                        </small>
+                      </div>
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <p>No hearings scheduled</p>
+              )}
+            </ul>
           </section>
         </div>
       </div>

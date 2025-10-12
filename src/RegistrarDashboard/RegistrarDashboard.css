@@ -1,0 +1,19 @@
+.gmail-style-table {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.table-row {
+  transition: transform 0.1s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.table-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+.table-row p {
+  margin: 0;
+}

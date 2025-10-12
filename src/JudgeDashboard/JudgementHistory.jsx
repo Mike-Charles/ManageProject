@@ -27,38 +27,41 @@ export default function JudgmentHistory() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (!storedUser) navigate("/login");
+    if (!storedUser) return navigate("/login");
 
     const parsedUser = JSON.parse(storedUser);
-    if (parsedUser.role !== "judge") navigate("/unauthorized");
+    if (parsedUser.role !== "judge") return navigate("/unauthorized");
 
     setUser(parsedUser);
     fetchJudgments(parsedUser._id);
     fetchNotifications(parsedUser._id);
   }, [navigate]);
 
+  // ✅ Fetch judgments by Judge ID
   const fetchJudgments = async (judgeId) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/judgments/judge/${judgeId}`
-      );
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/judgments/judge/${judgeId}`);
+      console.log("Fetched judgments:", res.data); // 🪶 Debug log
       setJudgments(res.data);
     } catch (err) {
       console.error("Error fetching judgments:", err);
     }
   };
 
+
+  // ✅ Fetch notifications
   const fetchNotifications = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/notifications/${userId}`
+        `https://courtcase-backend.onrender.com/api/notifications/${userId}`
       );
       setNotifications(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching notifications:", err);
     }
   };
 
+  // ✅ Logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -119,30 +122,42 @@ export default function JudgmentHistory() {
             <li onClick={() => navigate("/schedulehearing")}>
               <FaCalendarAlt /> Hearing Schedule
             </li>
-            <li className="active" onClick={() => navigate("/judgments")}>
-              <FaGavel /> Judgment History
-            </li>
             <li onClick={() => navigate("/progress")}>
               <FaChartPie /> Case Progress
             </li>
+            <li className="active" onClick={() => navigate("/judgments")}>
+              <FaGavel /> Judgment History
+            </li>
+
             <li onClick={() => navigate("/notification")}>
-            <div className=" position-relative" ref={notificationsRef}>
-              <FaBell
-                size={22}
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowNotifications(!showNotifications)}
-              />
-              <div style={{ marginLeft: '-28px', marginTop: '-90px', display: 'inline' }}>
-                {notifications.filter((n) => n.status === "Unread").length > 0 && (
-                  <span className="badge bg-danger rounded-pill start-100 translate-middle"
-                    style={{ fontSize: '0.6rem'}}
-                  >
-                    {notifications.filter((n) => n.status === "Unread").length}
-                  </span>
-                )}
+              <div className="position-relative" ref={notificationsRef}>
+                <FaBell
+                  size={22}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                />
+                <div
+                  style={{
+                    marginLeft: "-28px",
+                    marginTop: "-90px",
+                    display: "inline",
+                  }}
+                >
+                  {notifications.filter((n) => n.status === "Unread").length >
+                    0 && (
+                    <span
+                      className="badge bg-danger rounded-pill start-100 translate-middle"
+                      style={{ fontSize: "0.6rem" }}
+                    >
+                      {
+                        notifications.filter((n) => n.status === "Unread")
+                          .length
+                      }
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>             
-             Notifications
+              Notifications
             </li>
           </ul>
         </aside>
@@ -151,30 +166,48 @@ export default function JudgmentHistory() {
         <main className="admin-main">
           <section className="admin-card">
             <h3>Judgment History</h3>
-            {judgments.length === 0 ? (
-              <p>No judgments found.</p>
-            ) : (
-              <div className="judgment-list">
-                {judgments.map((j) => (
-                  <div key={j._id} className="judgment-card">
-                    <h4>{j.caseId?.title || "Untitled Case"}</h4>
-                    <p>
-                      <strong>Case Number:</strong> {j.caseId?.caseNumber}
-                    </p>
-                    <p>
-                      <strong>Date:</strong>{" "}
-                      {new Date(j.judgmentDate).toLocaleDateString()}
-                    </p>
-                    <p>
-                      <strong>Outcome:</strong> {j.outcome}
-                    </p>
-                    <p>
-                      <strong>Summary:</strong> {j.summary}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+<ul className="judgments-gmail-style">
+  {judgments.map((j) => (
+    <li key={j._id} className="judgment-item">
+      <div className="judgment-content">
+        <div className="judgment-title">
+          <FaGavel />
+          <strong>{j.caseId?.title || "Untitled Case"}</strong>
+        </div>
+
+        <p className="judgment-message">
+          {j.judgmentText || "No judgment text available."}
+        </p>
+
+        <p className="judgment-details">
+          Case Number: {j.caseId?.caseNumber || "N/A"} | Plaintiff:{" "}
+          {j.caseId?.plaintiff?.name || "Unknown"} vs Defendant:{" "}
+          {j.caseId?.defendant?.name || "Unknown"}
+        </p>
+
+        <span
+          className={`judgment-verdict ${
+            j.verdict?.toLowerCase() === "guilt"
+              ? "guilty"
+              : j.verdict?.toLowerCase() === "not guilty"
+              ? "not-guilty"
+              : "pending"
+          }`}
+        >
+          {j.verdict || "Pending"}
+        </span>
+      </div>
+
+      <div className="judgment-timestamp">
+        {j.createdAt
+          ? new Date(j.createdAt).toLocaleString()
+          : "No date available"}
+      </div>
+    </li>
+  ))}
+</ul>
+
+
           </section>
         </main>
       </div>

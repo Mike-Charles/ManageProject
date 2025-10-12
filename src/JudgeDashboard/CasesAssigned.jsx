@@ -374,23 +374,25 @@ export default function AssignedCases() {
                       <td>{c.filedByName || 'N/A'}</td>
                       <td>{c.status || 'Assigned'}</td>
                       <td>
-                        <button
-                          className="btn btn-sm btn-primary me-2 btn-create"
-                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30 }}
-                          onClick={() => setViewCase(c)}
-                          data-bs-toggle="modal"
-                          data-bs-target="#viewCaseModal"
-                        >
-                          <FaEye /> View
-                        </button>
-        
-                        <button
-                          className="btn btn-create"
-                          style={{ backgroundColor: "blue", color: "white", borderRadius: 30, cursor: "pointer", hover: { backgroundColor: "#0056b3" } }}
-                          onClick={() => navigate('/schedulenewhearing', { state: { caseId: c._id } })}
-                        >
-                          <FaEdit /> Schedule
-                        </button>
+                        <div className="d-flex">
+                          <button
+                            className="btn btn-sm btn-primary me-2 btn-create"
+                          style={{ backgroundColor: "grey", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer" }}
+                            onClick={() => setViewCase(c)}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewCaseModal"
+                          >
+                            <FaEye /> View
+                          </button>
+          
+                          <button
+                            className="btn btn-create"
+                          style={{ backgroundColor: "#28a745", color: "white", borderRadius: 30, display: "flex", gap: "8px", alignItems: "center", padding: "6px 12px", border: "none", cursor: "pointer" }}
+                            onClick={() => navigate('/schedulenewhearing', { state: { caseId: c._id } })}
+                          >
+                            <FaEdit /> Schedule
+                          </button>
+                        </div>
                       </td>
 
                     </tr>

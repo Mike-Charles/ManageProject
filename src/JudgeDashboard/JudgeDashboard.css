@@ -127,3 +127,122 @@
   margin-left: 12px;
 }
 
+
+
+
+
+
+/* === Overall page styling === */
+.admin-main {
+  background-color: #f5f7fa;
+  padding: 20px;
+}
+
+/* Section title */
+.admin-main h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* === Gmail-like list container === */
+.judgments-gmail-style {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* === Individual judgment card === */
+.judgment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 15px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.judgment-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* === Left content === */
+.judgment-content {
+  flex: 1;
+}
+
+.judgment-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #202124;
+}
+
+.judgment-title svg {
+  margin-right: 8px;
+  color: #0d6efd;
+}
+
+.judgment-message {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+/* Case details text */
+.judgment-details {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* === Verdict badge === */
+.judgment-verdict {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.judgment-verdict.guilty {
+  background-color: #dc3545;
+}
+
+.judgment-verdict["not guilty"],
+.judgment-verdict.not-guilty {
+  background-color: #198754;
+}
+
+.judgment-verdict.pending {
+  background-color: #f0ad4e;
+}
+
+/* === Right timestamp === */
+.judgment-timestamp {
+  font-size: 0.8rem;
+  color: #777;
+  white-space: nowrap;
+  margin-left: 15px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .judgment-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .judgment-timestamp {
+    margin-top: 8px;
+    margin-left: 0;
+  }
+}
