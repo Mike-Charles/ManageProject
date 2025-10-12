@@ -37,7 +37,7 @@ export default function AssignedCases() {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.put(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: "Read" } : n
@@ -78,7 +78,7 @@ export default function AssignedCases() {
 
   const fetchAssignedCases = async (judgeId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/cases/assigned/${judgeId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/cases/assigned/${judgeId}`);
       setAssignedCases(res.data);
     } catch (err) {
       console.error(err);
@@ -87,7 +87,7 @@ export default function AssignedCases() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error(err);

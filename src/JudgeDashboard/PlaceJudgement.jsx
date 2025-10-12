@@ -54,7 +54,7 @@ export default function PlaceJudgment() {
 
   const fetchCase = async (id) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/cases/${id}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/cases/${id}`);
       if (!res.data) {
         setError("Case not found");
       } else {
@@ -70,7 +70,7 @@ export default function PlaceJudgment() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -91,7 +91,7 @@ export default function PlaceJudgment() {
     }
 
     try {
-      await axios.post(`http://localhost:5000/api/judgments`, {
+      await axios.post(`https://courtcase-backend.onrender.com/api/judgments`, {
         caseId,
         judgmentText,
         verdict,
@@ -102,13 +102,13 @@ export default function PlaceJudgment() {
         const formData = new FormData();
         formData.append("document", documentFile);
         await axios.post(
-          `http://localhost:5000/api/documents/upload/${caseId}`,
+          `https://courtcase-backend.onrender.com/api/documents/upload/${caseId}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
       }
 
-      await axios.put(`http://localhost:5000/api/cases/${caseId}/updateStatus`, {
+      await axios.put(`https://courtcase-backend.onrender.com/api/cases/${caseId}/updateStatus`, {
         status: "Judged",
       });
 
@@ -123,7 +123,7 @@ export default function PlaceJudgment() {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.put(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: "Read" } : n

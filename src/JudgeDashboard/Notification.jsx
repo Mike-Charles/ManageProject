@@ -68,7 +68,7 @@ export default function NotificationsPage() {
     // then fetch notifications immediately.
     (async () => {
       try {
-        await axios.post(`http://localhost:5000/api/notifications/sync/${parsedUser._id}`);
+        await axios.post(`https://courtcase-backend.onrender.com/api/notifications/sync/${parsedUser._id}`);
       } catch (err) {
         // sync can fail if endpoint wasn't mounted — still attempt to fetch
         console.error("Sync error (okay if endpoint not present):", err.message || err);
@@ -90,7 +90,7 @@ export default function NotificationsPage() {
   // --- FETCH NOTIFICATIONS (populated case info expected from backend) ---
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       // Sort unread first, then newest
       const sorted = (res.data || []).sort((a, b) => {
         if (a.status === "Unread" && b.status === "Read") return -1;
@@ -112,7 +112,7 @@ export default function NotificationsPage() {
         prev.map((n) => (n._id === notificationId ? { ...n, status: "Read" } : n))
       );
 
-      await axios.patch(`http://localhost:5000/api/notifications/read/${notificationId}`);
+      await axios.patch(`https://courtcase-backend.onrender.com/api/notifications/read/${notificationId}`);
       // backend updated; we already updated UI optimistically
     } catch (err) {
       console.error("Error marking notification as read:", err);

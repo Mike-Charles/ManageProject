@@ -54,7 +54,7 @@ export default function ScheduleHearing() {
 
   const fetchHearings = async (judgeId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/schedules/judge/${judgeId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/schedules/judge/${judgeId}`);
       setHearings(res.data);
     } catch (err) {
       console.error('Error fetching hearings:', err);
@@ -63,7 +63,7 @@ export default function ScheduleHearing() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error(err);
@@ -79,7 +79,7 @@ export default function ScheduleHearing() {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.patch(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.patch(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: 'Read' } : n

@@ -52,7 +52,7 @@ export default function ProgressPage() {
 
   const fetchProgressCases = async (judgeId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/schedules/progress/${judgeId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/schedules/progress/${judgeId}`);
       const cases = res.data.map((c) => ({
         ...c,
         caseId: c.caseId || { _id: c._id, title: c.title, caseNumber: c.caseNumber },
@@ -68,7 +68,7 @@ export default function ProgressPage() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error(err);
@@ -84,7 +84,7 @@ export default function ProgressPage() {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.patch(`http://localhost:5000/api/notifications/${notificationId}/read`);
+      await axios.patch(`https://courtcase-backend.onrender.com/api/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, status: "Read" } : n
