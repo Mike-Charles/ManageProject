@@ -88,7 +88,7 @@ export default function JudgeDashboard() {
   // API Calls
   const fetchAssignedCases = async (judgeId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/cases/assigned/${judgeId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/cases/assigned/${judgeId}`);
       setAssignedCases(res.data);
     } catch (err) {
       console.error(err);
@@ -98,7 +98,7 @@ export default function JudgeDashboard() {
 const fetchStats = async (judgeId) => {
   try {
     const res = await axios.get(
-      `http://localhost:5000/api/schedules/status-stats/judge/${judgeId}`
+      `https://courtcase-backend.onrender.com/api/schedules/status-stats/judge/${judgeId}`
     );
     setCaseStats(res.data);
   } catch (err) {
@@ -111,7 +111,7 @@ const fetchStats = async (judgeId) => {
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/notifications/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error(err);
@@ -120,7 +120,7 @@ const fetchStats = async (judgeId) => {
 
   const fetchHearings = async (judgeId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/schedules/judge/${judgeId}`);
+      const res = await axios.get(`https://courtcase-backend.onrender.com/api/schedules/judge/${judgeId}`);
       setHearings(res.data);
       setCurrentHearings(res.data.slice(0, 5));
     } catch (err) {
@@ -131,7 +131,7 @@ const fetchStats = async (judgeId) => {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.patch(`http://localhost:5000/api/notifications/read/${notificationId}`);
+      await axios.patch(`https://courtcase-backend.onrender.com/api/notifications/read/${notificationId}`);
       fetchNotifications(user._id);
     } catch (err) {
       console.error(err);
